@@ -11,7 +11,7 @@ export async function GET(ctx: Ctx) {
 
 // API endpoint configs
 export const path = '/api/hello';
-export const middlewares = ['logger', 'dataValidation'];
+export const middlewares = ['builtInLogger', 'logger', 'dataValidation'];
 
 // API endpoint data validation
 export const validation: ValidationType = {

@@ -1,6 +1,7 @@
 import {
   Yelix,
   requestDataValidationMiddleware,
+  simpleLoggerMiddeware,
   type Middleware,
 } from '@/mod.ts';
 import * as path from "jsr:@std/path@1.0.8";
@@ -13,7 +14,7 @@ const loggerMiddleware: Middleware = async (request, next, yelix) => {
 
 async function main() {
   const app = new Yelix({
-    debug: true,
+    debug: false,
     port: 3030,
   });
 
@@ -21,6 +22,7 @@ async function main() {
   const API_Folder = path.join(currentDir, 'testing', 'api');
   await app.loadEndpointsFromFolder(API_Folder);
 
+  app.setMiddleware('builtInLogger', simpleLoggerMiddeware);
   app.setMiddleware('logger', loggerMiddleware);
   app.setMiddleware('dataValidation', requestDataValidationMiddleware);
 

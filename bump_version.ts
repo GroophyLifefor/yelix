@@ -1,5 +1,6 @@
 async function bumpVersion(type: 'patch' | 'minor' | 'major') {
   const fileNames = ['jsr.json', 'deno.json'];
+
   await fileNames.forEach(async (fileName) => {
     const data = await Deno.readTextFile(fileName);
     const json = JSON.parse(data);
@@ -20,6 +21,11 @@ async function bumpVersion(type: 'patch' | 'minor' | 'major') {
     }
 
     await Deno.writeTextFile(fileName, JSON.stringify(json, null, 2) + '\n');
+
+    await Deno.writeTextFile('version.ts', `
+const version = '${json.version}';
+export default version;
+      `.trim() + '\n');
     console.log(`✅ Updated version to ${json.version}`);
   });
 }

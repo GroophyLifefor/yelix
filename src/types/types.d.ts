@@ -49,6 +49,7 @@ type ParsedEndpoint = {
 type AppConfigType = {
   debug: boolean;
   port: number;
+  noWelcome: boolean;
 };
 
 type OptionalAppConfigType = {

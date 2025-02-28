@@ -1,10 +1,14 @@
+// deno-lint-ignore-file no-explicit-any
 import type { Yelix } from "@/mod.ts";
 
-// deno-lint-ignore no-explicit-any
 function yelix_log(parent: Yelix, ...params: any): void {
   if (parent.appConfig.debug) {
-    console.log(...params);
+    yelixClientLog(...params);
   }
 }
 
-export { yelix_log };
+function yelixClientLog(...params: any): void {
+  console.log(...params);
+}
+
+export { yelix_log, yelixClientLog };

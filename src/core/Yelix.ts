@@ -1,13 +1,25 @@
 // deno-lint-ignore-file no-explicit-any
-import { Hono } from "hono";
-import { loadEndpoints, loadEndpointsFromFolder } from "@/src/api/endpoints/loadEndpoints.ts";
-import { serveEndpoints } from "@/src/api/endpoints/serveEndpoints.ts";
-import type { AppConfigType, ParsedEndpoint, Middleware, OptionalAppConfigType, Endpoint } from "@/src/types/types.d.ts";
-import { yelix_log } from "@/src/utils/logging.ts";
+import { Hono } from 'hono';
+import {
+  loadEndpoints,
+  loadEndpointsFromFolder,
+} from '@/src/api/endpoints/loadEndpoints.ts';
+import { serveEndpoints } from '@/src/api/endpoints/serveEndpoints.ts';
+import type {
+  AppConfigType,
+  ParsedEndpoint,
+  Middleware,
+  OptionalAppConfigType,
+  Endpoint,
+} from '@/src/types/types.d.ts';
+import { yelix_log, yelixClientLog } from '@/src/utils/logging.ts';
+import { sayWelcome } from '@/src/utils/welcome.ts';
+import version from '@/version.ts';
 
 const defaultConfig: AppConfigType = {
   debug: false,
   port: 3030,
+  noWelcome: false,
 };
 
 class Yelix {
@@ -17,10 +29,19 @@ class Yelix {
   appConfig: AppConfigType = defaultConfig;
   private isLoadingEndpoints: boolean = false;
 
-  constructor(appConfig: OptionalAppConfigType) {
+  constructor(appConfig?: OptionalAppConfigType) {
     const config = { ...defaultConfig, ...appConfig };
     this.appConfig = config;
     this.app = new Hono();
+
+    if (!config.noWelcome) {
+      sayWelcome();
+    }
+  }
+
+  // this will be shown even not debug mode
+  clientLog(...params: any): void {
+    yelixClientLog(...params);
   }
 
   log(...params: any): void {
@@ -28,8 +49,8 @@ class Yelix {
       '%c INFO %c',
       'background-color: white; color: black;',
       'background-color: inherit',
-      ...params
-    ]
+      ...params,
+    ];
     yelix_log(this, ...props);
   }
 
@@ -38,8 +59,8 @@ class Yelix {
       '%c WARN %c',
       'background-color: orange;',
       'background-color: inherit',
-      ...params
-    ]
+      ...params,
+    ];
     yelix_log(this, ...props);
   }
 
@@ -48,8 +69,8 @@ class Yelix {
       '%c WARN %c',
       'background-color: red;',
       'background-color: inherit',
-      ...params
-    ]
+      ...params,
+    ];
     yelix_log(this, ...props);
     console.error('❌', ...params);
     throw new Error(...params);
@@ -67,7 +88,7 @@ class Yelix {
   }
 
   async loadEndpointsFromFolder(path: string): Promise<void> {
-    const isDenoDeploy = Deno.env.get("DENO_DEPLOYMENT_ID") !== undefined;
+    const isDenoDeploy = Deno.env.get('DENO_DEPLOYMENT_ID') !== undefined;
 
     if (isDenoDeploy) {
       this.throw('Deno Deploy does not support dynamic imports');
@@ -81,13 +102,41 @@ class Yelix {
     this.isLoadingEndpoints = false;
   }
 
+  private onListen(addr: any, yelix: Yelix) {
+    const packageVersion = version;
+
+    const hostname = addr.hostname;
+    const isLocalhost = hostname === '0.0.0.0';
+    const port = addr.port;
+    const addrStr = isLocalhost
+      ? `http://localhost:${port}`
+      : `http://${hostname}:${port}`;
+
+    yelix.clientLog();
+    yelix.clientLog(
+      '  %c 𝕐 Yelix %c' + packageVersion,
+      'color: orange;',
+      'color: inherit'
+    );
+    yelix.clientLog(`   - Local:   ${addrStr}`);
+    yelix.clientLog();
+  }
+
   serve() {
     if (this.isLoadingEndpoints) {
-      this.warn('Endpoints are still loading, you may not await the loadEndpointsFromFolder method');
+      this.warn(
+        'Endpoints are still loading, you may not await the loadEndpointsFromFolder method'
+      );
     }
-    
+
     serveEndpoints(this, this.endpointList);
-    Deno.serve({ port: this.appConfig.port }, this.app.fetch);
+    Deno.serve(
+      {
+        port: this.appConfig.port,
+        onListen: (_: any) => this.onListen(_, this),
+      },
+      this.app.fetch
+    );
   }
 }
 
