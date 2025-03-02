@@ -11,21 +11,24 @@ import type {
   Middleware,
   OptionalAppConfigType,
   Endpoint,
+  MiddlewareList
 } from '@/src/types/types.d.ts';
 import { yelix_log, yelixClientLog } from '@/src/utils/logging.ts';
 import { sayWelcome } from '@/src/utils/welcome.ts';
 import version from '@/version.ts';
+import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
 
 const defaultConfig: AppConfigType = {
   debug: false,
   port: 3030,
   noWelcome: false,
+  dontIncludeDefaultMiddlewares: false,
 };
 
 class Yelix {
   app: Hono;
   endpointList: ParsedEndpoint[] = [];
-  middlewares: Record<string, Middleware> = {};
+  middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
   private isLoadingEndpoints: boolean = false;
 
@@ -36,6 +39,10 @@ class Yelix {
 
     if (!config.noWelcome) {
       sayWelcome();
+    }
+
+    if (!config.dontIncludeDefaultMiddlewares) {
+      this.setMiddleware('*', simpleLoggerMiddeware);
     }
   }
 
@@ -76,8 +83,8 @@ class Yelix {
     throw new Error(...params);
   }
 
-  setMiddleware(name: string, middleware: Middleware) {
-    this.middlewares[name] = middleware;
+  setMiddleware(name: string | RegExp, middleware: Middleware) {
+    this.middlewares.push({ match: name, middleware });
   }
 
   loadEndpoints(endpointEntries: Endpoint[]) {

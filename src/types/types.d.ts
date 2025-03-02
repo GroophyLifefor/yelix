@@ -50,6 +50,7 @@ type AppConfigType = {
   debug: boolean;
   port: number;
   noWelcome: boolean;
+  dontIncludeDefaultMiddlewares: boolean;
 };
 
 type OptionalAppConfigType = {
@@ -57,6 +58,13 @@ type OptionalAppConfigType = {
 };
 
 type Middleware = (request: ApplyMiddlewareParams, next: () => Promise<void>, yelix: Yelix) => Promise<Record<string, unknown>> | Record<string, unknown> | Promise<void> | void;
+
+type MiddlewareList = {
+  match: string | RegExp;
+  middleware: Middleware;
+}
+
+type QueryType = Record<string, any>;
 
 export type {
   Ctx,
@@ -69,5 +77,7 @@ export type {
   ParsedMethod,
   ApplyMiddlewareParams,
   Middleware,
-  ExportsType
+  ExportsType,
+  MiddlewareList,
+  QueryType
 };

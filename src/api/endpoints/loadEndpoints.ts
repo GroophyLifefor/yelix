@@ -25,14 +25,14 @@ function loadEndpoints(yelix: Yelix, endpoints: Endpoint[]) {
   yelix.log(`🔍 Processing ${endpoints.length} endpoints`);
   const parsedEndpoints: ParsedEndpoint[] = [];
 
-  endpoints.forEach((endpoint: Endpoint, index) => {
+  for (const [index, endpoint] of endpoints.entries()) {
     yelix.log(`🔍 Processing endpoint ${index + 1}/${endpoints.length}`);
     
     // Look for Path Export, path is required
     const path = endpoint.path;
     if (!path) {
       yelix.log('❌ ERROR: Missing path in endpoint');
-      throw new Error('LOADENDPOINTS - ERROR - No path found for endpoint');
+      continue;
     }
     yelix.log(`📍 Found path: ${path}`);
 
@@ -85,7 +85,7 @@ function loadEndpoints(yelix: Yelix, endpoints: Endpoint[]) {
 
     parsedEndpoints.push(parsedEndpoint);
     yelix.log(`✅ Finished processing endpoint: ${path}`);
-  });
+  };
 
   yelix.log(`✅ Completed processing all endpoints. Total: ${parsedEndpoints.length}`);
   return parsedEndpoints;

@@ -22,8 +22,6 @@ async function main() {
   const API_Folder = path.join(currentDir, 'testing', 'api');
   await app.loadEndpointsFromFolder(API_Folder);
 
-  app.setMiddleware('builtInLogger', simpleLoggerMiddeware);
-  app.setMiddleware('logger', loggerMiddleware);
   app.setMiddleware('dataValidation', requestDataValidationMiddleware);
 
   app.serve();

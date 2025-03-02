@@ -22,8 +22,27 @@ const simpleLoggerMiddeware: Middleware = async (request, next, yelix) => {
   const durationUnit = isMicroseconds ? 'μs' : 'ms';
   const durationFixed = (isMicroseconds ? duration * 1000 : duration).toFixed(0);
 
+  const cacheStatus = request.ctx.get('x-cache');
+  let cacheText = '';
+  let cacheColorize = '';
+
+  if (cacheStatus) {
+    cacheText = 'Cache: ' + cacheStatus.toUpperCase();
+
+    if (cacheStatus === 'hit') {
+      cacheColorize = 'color: gray;';
+    } else {
+      cacheColorize = 'background-color: white; color: black;';
+    }
+  } else {
+    cacheText = 'Cache: not implemented';
+    cacheColorize = 'color: gray;';
+  }
+
   yelix.clientLog(
-    `${method} ${pathname} %c${status}%c in ${durationFixed}${durationUnit}`,
+    `${method} %c ${cacheText} %c ${pathname} %c${status}%c in ${durationFixed}${durationUnit}`,
+    cacheColorize,
+    '',
     `color: ${colorsByStatus(status)};`,
     'color: white;'
   );
