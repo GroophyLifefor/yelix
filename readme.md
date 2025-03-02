@@ -10,47 +10,90 @@ Yelix is a powerful web server library built specifically for [Deno](https://den
 - **Backend documentation generation** – Creates comprehensive API docs with minimal setup.
 - **Optional automation** – Features can be enabled or disabled as needed.
 - **Deno-native** – Designed specifically for Deno with TypeScript support.
+- **API folder structure** - Load endpoints from dedicated folders.
 
 ## Installation
 
 ```sh
-deno add yelix
+deno add @murat/yelix
 ```
 
 ## Getting Started
 
-Here's a quick example to get you started:
+### Prerequisites
 
-```typescript
-import { Yelix } from "https://deno.land/x/yelix/mod.ts";
-import { z } from "https://deno.land/x/zod/mod.ts";
+- [Deno](https://deno.land/) installed on your system
 
-const app = new Yelix();
+### Create a new project
 
-app.get("/hello", {
-  query: z.object({ name: z.string().min(1) }),
-}, (c) => {
-  const { name } = c.query;
-  return c.json({ message: `Hello, ${name}!` });
-});
+```sh
+# Initialize a new Deno project
+deno init my-app
 
-app.listen(3000);
+# Change to project directory
+cd my-app
+
+# Install Yelix
+deno add @murat/yelix
 ```
 
-## API Documentation
+### Create your server
 
-Once the server is running, visit `http://localhost:3000/docs` to view the auto-generated OpenAPI documentation.
-
-## Configuration
-
-Yelix provides optional configurations to customize features like validation, documentation, and logging.
+Update your `main.ts` file with the following code:
 
 ```typescript
-const app = new Yelix({
-  enableDocs: true,
-  validateRequests: true,
-});
+import { Yelix } from "jsr:@murat/yelix";
+import * as path from "jsr:@std/path@1.0.8";
+
+async function main() {
+  // Port is 3030 by default
+  const app = new Yelix();
+
+  // Load endpoints from an 'api' folder
+  const currentDir = Deno.cwd();
+  const API_Folder = path.join(currentDir, 'api');
+  await app.loadEndpointsFromFolder(API_Folder);
+
+  app.serve();
+}
+
+await main();
 ```
+
+### Create an API endpoint
+
+Create a new folder named `api` in your project directory, then add a file `hello.ts` with:
+
+```typescript
+import type { Ctx } from "jsr:@murat/yelix";
+
+// API endpoint handler
+export async function GET(ctx: Ctx) {
+  return await ctx.text('Hello World!', 200);
+}
+
+// API endpoint configs
+export const path = '/api/hello';
+```
+
+### Run your server
+
+Start the development server with:
+
+```sh
+deno run --watch --allow-net --allow-read main.ts
+```
+
+Command flags:
+- `--watch`: Automatically reloads server when changes are made
+- `--allow-net`: Permits network access for serving
+- `--allow-read`: Allows file access for loading endpoints
+
+Visit `http://localhost:3030/api/hello` to see your endpoint in action.
+
+## Deployment Notes
+
+⚠️ **Caution**: Deno Deploy doesn't support the `loadEndpointsFromFolder` method due to security restrictions around dynamic importing. When deploying to Deno Deploy, use the `loadEndpoints` method instead.
 
 ## Contributing
 
