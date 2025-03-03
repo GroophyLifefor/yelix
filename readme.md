@@ -15,7 +15,7 @@ Yelix is a powerful web server library built specifically for [Deno](https://den
 ## Installation
 
 ```sh
-deno add @murat/yelix
+deno add jsr:@murat/yelix
 ```
 
 ## Getting Started
@@ -34,7 +34,7 @@ deno init my-app
 cd my-app
 
 # Install Yelix
-deno add @murat/yelix
+deno add jsr:@murat/yelix
 ```
 
 ### Create your server
@@ -81,13 +81,14 @@ export const path = '/api/hello';
 Start the development server with:
 
 ```sh
-deno run --watch --allow-net --allow-read main.ts
+deno run --watch --allow-net --allow-read --allow-env main.ts
 ```
 
 Command flags:
 - `--watch`: Automatically reloads server when changes are made
 - `--allow-net`: Permits network access for serving
 - `--allow-read`: Allows file access for loading endpoints
+- `--allow-env`: Checking where is deployed for Deno Deploy
 
 Visit `http://localhost:3030/api/hello` to see your endpoint in action.
 
