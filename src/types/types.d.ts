@@ -3,8 +3,8 @@ import type { Context } from 'hono';
 import type z from 'zod';
 import type { H } from 'hono/types';
 import type { Yelix } from "@/mod.ts";
-import { InitializeOpenAPIParams, OpenAPIDoc } from "@/src/OpenAPI/openAPI.types.ts";
-import { ApiReferenceOptions } from "npm:@scalar/hono-api-reference";
+import type { InitializeOpenAPIParams, OpenAPIDoc } from "@/src/OpenAPI/openAPI.types.ts";
+import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
 
 type Ctx = Context;
 
