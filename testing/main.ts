@@ -4,7 +4,7 @@ import {
   simpleLoggerMiddeware,
   type Middleware,
 } from '@/mod.ts';
-import * as path from "jsr:@std/path@1.0.8";
+import * as path from 'jsr:@std/path@1.0.8';
 
 const loggerMiddleware: Middleware = async (request, next, yelix) => {
   yelix.log('New request to', request.ctx.req.path);
@@ -18,6 +18,18 @@ async function main() {
     port: 3030,
   });
 
+  app.initOpenAPI({
+    path: '/docs',
+    title: 'Yelix Testing API',
+    description: 'This is a testing API for Yelix',
+    servers: [
+      { 
+        url: 'http://localhost:3000', 
+        description: 'Local Server'
+      }],
+    excludeMethods: ['options'],
+  });
+
   const currentDir = Deno.cwd();
   const API_Folder = path.join(currentDir, 'testing', 'api');
   await app.loadEndpointsFromFolder(API_Folder);
@@ -26,7 +38,5 @@ async function main() {
 
   app.serve();
 }
-
-
 
 await main();

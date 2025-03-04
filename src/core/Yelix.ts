@@ -11,12 +11,20 @@ import type {
   Middleware,
   OptionalAppConfigType,
   Endpoint,
-  MiddlewareList
+  MiddlewareList,
+  InitOpenAPIParams,
 } from '@/src/types/types.d.ts';
 import { yelix_log, yelixClientLog } from '@/src/utils/logging.ts';
 import { sayWelcome } from '@/src/utils/welcome.ts';
 import version from '@/version.ts';
-import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
+import { simpleLoggerMiddeware } from '@/src/api/middlewares/simpleLogger.ts';
+import {
+  InitializeOpenAPIParams,
+  initOpenAPI,
+  openAPI,
+} from '@/src/OpenAPI/index.ts';
+import { apiReference } from 'npm:@scalar/hono-api-reference';
+import { object } from 'zod';
 
 const defaultConfig: AppConfigType = {
   debug: false,
@@ -107,6 +115,38 @@ class Yelix {
       this.endpointList.push(endpoint);
     });
     this.isLoadingEndpoints = false;
+  }
+
+  initOpenAPI(config: InitOpenAPIParams): void {
+    const path = config.path;
+    const openAPIConfig: InitializeOpenAPIParams = {
+      title: config.title,
+      description: config.description,
+      servers: config.servers,
+      excludeMethods: config.excludeMethods,
+    };
+    initOpenAPI(openAPIConfig);
+
+    this.app.get('/yelix-openapi-raw', (c) => {
+      return c.json(openAPI, 200);
+    });
+
+    const defaultConfig = {
+      theme: 'saturn',
+      favicon: '/public/favicon.ico',
+      pageTitle: 'Yelix API Docs',
+    };
+    const apiReferenceConfig = Object.assign(
+      defaultConfig,
+      config.apiReferenceConfig
+    );
+
+    apiReferenceConfig.spec = { url: '/yelix-openapi-raw' };
+
+    this.app.get(
+      path,
+      apiReference(apiReferenceConfig)
+    );
   }
 
   private onListen(addr: any, yelix: Yelix) {

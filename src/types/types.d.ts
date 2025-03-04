@@ -3,6 +3,8 @@ import type { Context } from 'hono';
 import type z from 'zod';
 import type { H } from 'hono/types';
 import type { Yelix } from "@/mod.ts";
+import { InitializeOpenAPIParams, OpenAPIDoc } from "@/src/OpenAPI/openAPI.types.ts";
+import { ApiReferenceOptions } from "npm:@scalar/hono-api-reference";
 
 type Ctx = Context;
 
@@ -26,7 +28,7 @@ type Endpoint = {
   PATCH?: EndpointHandler;
   middlewares?: string[];
   validation?: ValidationType;
-  openAPI?: string | undefined; // TODO: WILL BE IMPLEMENTED LATER
+  openAPI?: OpenAPIDoc | undefined;
 };
 
 type ApplyMiddlewareParams = {
@@ -44,6 +46,7 @@ type ParsedEndpoint = {
   path: string;
   methods: ParsedMethod[];
   exports: ExportsType;
+  openAPI?: OpenAPIDoc;
 };
 
 type AppConfigType = {
@@ -66,6 +69,11 @@ type MiddlewareList = {
 
 type QueryType = Record<string, any>;
 
+type InitOpenAPIParams = {
+  path: string;
+  apiReferenceConfig?: ApiReferenceOptions;
+} & InitializeOpenAPIParams;
+
 export type {
   Ctx,
   ValidationType,
@@ -79,5 +87,6 @@ export type {
   Middleware,
   ExportsType,
   MiddlewareList,
-  QueryType
+  QueryType,
+  InitOpenAPIParams
 };
