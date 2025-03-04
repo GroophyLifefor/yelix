@@ -19,12 +19,11 @@ import { sayWelcome } from '@/src/utils/welcome.ts';
 import version from '@/version.ts';
 import { simpleLoggerMiddeware } from '@/src/api/middlewares/simpleLogger.ts';
 import {
-  InitializeOpenAPIParams,
+  type InitializeOpenAPIParams,
   initOpenAPI,
   openAPI,
 } from '@/src/OpenAPI/index.ts';
-import { apiReference } from 'npm:@scalar/hono-api-reference';
-import { object } from 'zod';
+import { apiReference } from 'npm:@scalar/hono-api-reference@0.5.172';
 
 const defaultConfig: AppConfigType = {
   debug: false,

@@ -2,7 +2,6 @@ import type { Endpoint, EndpointHandler, ExportsType, ParsedEndpoint, ParsedMeth
 import * as path from "jsr:@std/path@1.0.8";
 import type { Yelix } from "@/mod.ts";
 import { buildMiddlewareSteps } from "./middlewareHandler.ts";
-import { AddOpenAPIEndpointParams, OpenAPIMethods } from "@/src/OpenAPI/openAPI.types.ts";
 
 async function loadEndpointsFromFolder(yelix: Yelix, _path: string) {
   yelix.log('📂 Loading endpoints from folder', _path);

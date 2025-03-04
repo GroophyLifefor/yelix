@@ -2,7 +2,7 @@ import type { Handler, Hono } from 'hono';
 import type { ParsedEndpoint } from '@/src/types/types.d.ts';
 import type { H } from 'hono/types';
 import type { Yelix } from '@/mod.ts';
-import { AddOpenAPIEndpointParams, OpenAPIMethods } from "@/src/OpenAPI/openAPI.types.ts";
+import type { AddOpenAPIEndpointParams, OpenAPIMethods } from "@/src/OpenAPI/openAPI.types.ts";
 import { addOpenAPIEndpoint } from "@/src/OpenAPI/index.ts";
 
 interface MethodMap {

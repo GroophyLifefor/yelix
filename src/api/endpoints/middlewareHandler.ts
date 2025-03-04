@@ -7,7 +7,6 @@ import type {
   Middleware,
   ParsedEndpoint,
 } from '@/src/types/types.d.ts';
-import { AddOpenAPIEndpointParams, OpenAPIMethods } from "@/src/OpenAPI/openAPI.types.ts";
 
 async function applyMiddleware(
   yelix: Yelix,
@@ -35,7 +34,7 @@ export function buildMiddlewareSteps(
   endpoint: ParsedEndpoint,
   middlewareKeys: string[]
 ): H[] {
-  const { path, middlewares, methods, exports, openAPI } = endpoint;
+  const { path, middlewares, methods, exports } = endpoint;
   const steps: H[] = [];
 
   const middlewareList = middlewareKeys || [];
