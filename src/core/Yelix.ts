@@ -24,12 +24,14 @@ import {
   openAPI,
 } from '@/src/OpenAPI/index.ts';
 import { apiReference } from 'npm:@scalar/hono-api-reference@0.5.172';
+import { serveIndexPage } from '@/src/api/indexPage/getHtml.ts';
 
 const defaultConfig: AppConfigType = {
   debug: false,
   port: 3030,
   noWelcome: false,
   dontIncludeDefaultMiddlewares: false,
+  dontServeIndexPage: false,
 };
 
 class Yelix {
@@ -37,6 +39,7 @@ class Yelix {
   endpointList: ParsedEndpoint[] = [];
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
+  docsPath?: string;
   private isLoadingEndpoints: boolean = false;
   private __server: any;
   // @type {HttpServer<NetAddr>}
@@ -55,6 +58,8 @@ class Yelix {
     if (!config.dontIncludeDefaultMiddlewares) {
       this.setMiddleware('*', simpleLoggerMiddeware);
     }
+
+    if (!this.appConfig.dontServeIndexPage) serveIndexPage({ yelix: this, docsPath: this.docsPath });
   }
 
   // this will be shown even not debug mode
@@ -123,6 +128,8 @@ class Yelix {
   initOpenAPI(config: InitOpenAPIParams): void {
     const path = config.path;
 
+    this.docsPath = path;
+
     this.__servedInformations.push({
       title: 'OpenAPI Docs',
       description: path,
@@ -169,8 +176,10 @@ class Yelix {
     });
   }
 
-  private onListen(addr: any, yelix: Yelix) {
+  private async onListen(addr: any, yelix: Yelix) {
     this.__addLocalInformationToInitiate(addr);
+
+    
 
     const packageVersion = version;
 
@@ -180,9 +189,13 @@ class Yelix {
       'color: orange;',
       'color: inherit'
     );
-    const maxLength = Math.max(...this.__servedInformations.map((i) => i.title.length));
+    const maxLength = Math.max(
+      ...this.__servedInformations.map((i) => i.title.length)
+    );
     this.__servedInformations.forEach((info) => {
-      yelix.clientLog(`   - ${info.title.padEnd(maxLength)}:   ${info.description}`);
+      yelix.clientLog(
+        `   - ${info.title.padEnd(maxLength)}:   ${info.description}`
+      );
     });
     yelix.clientLog();
   }
@@ -207,6 +220,7 @@ class Yelix {
     this.__sigintListener = () => {
       yelixClientLog('interrupted!');
       this.kill();
+      Deno.exit();
     };
 
     Deno.addSignalListener('SIGINT', this.__sigintListener);

@@ -54,6 +54,7 @@ type AppConfigType = {
   port: number;
   noWelcome: boolean;
   dontIncludeDefaultMiddlewares: boolean;
+  dontServeIndexPage: boolean;
 };
 
 type OptionalAppConfigType = {

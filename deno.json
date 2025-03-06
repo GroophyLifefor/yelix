@@ -3,6 +3,7 @@
   "exports": "./mod.ts",
   "version": "0.1.14",
   "license": "MIT",
+  "nodeModulesDir": "auto",
   "tasks": {
     "dev": "deno run --watch --allow-net --allow-read --allow-env ./testing/main.ts",
     "bump:patch": "deno run --allow-read --allow-write bump_version.ts patch",
