@@ -38,6 +38,10 @@ class Yelix {
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
   private isLoadingEndpoints: boolean = false;
+  private __server: any;
+  // @type {HttpServer<NetAddr>}
+  private __sigintListener: any;
+  private __servedInformations: { title: string; description: string }[] = [];
 
   constructor(appConfig?: OptionalAppConfigType) {
     const config = { ...defaultConfig, ...appConfig };
@@ -118,6 +122,12 @@ class Yelix {
 
   initOpenAPI(config: InitOpenAPIParams): void {
     const path = config.path;
+
+    this.__servedInformations.push({
+      title: 'OpenAPI Docs',
+      description: path,
+    });
+
     const openAPIConfig: InitializeOpenAPIParams = {
       title: config.title,
       description: config.description,
@@ -142,15 +152,10 @@ class Yelix {
 
     apiReferenceConfig.spec = { url: '/yelix-openapi-raw' };
 
-    this.app.get(
-      path,
-      apiReference(apiReferenceConfig)
-    );
+    this.app.get(path, apiReference(apiReferenceConfig));
   }
 
-  private onListen(addr: any, yelix: Yelix) {
-    const packageVersion = version;
-
+  private __addLocalInformationToInitiate(addr: any) {
     const hostname = addr.hostname;
     const isLocalhost = hostname === '0.0.0.0';
     const port = addr.port;
@@ -158,13 +163,27 @@ class Yelix {
       ? `http://localhost:${port}`
       : `http://${hostname}:${port}`;
 
+    this.__servedInformations.unshift({
+      title: 'Local',
+      description: addrStr,
+    });
+  }
+
+  private onListen(addr: any, yelix: Yelix) {
+    this.__addLocalInformationToInitiate(addr);
+
+    const packageVersion = version;
+
     yelix.clientLog();
     yelix.clientLog(
       '  %c 𝕐 Yelix %c' + packageVersion,
       'color: orange;',
       'color: inherit'
     );
-    yelix.clientLog(`   - Local:   ${addrStr}`);
+    const maxLength = Math.max(...this.__servedInformations.map((i) => i.title.length));
+    this.__servedInformations.forEach((info) => {
+      yelix.clientLog(`   - ${info.title.padEnd(maxLength)}:   ${info.description}`);
+    });
     yelix.clientLog();
   }
 
@@ -176,13 +195,32 @@ class Yelix {
     }
 
     serveEndpoints(this, this.endpointList);
-    Deno.serve(
+    const server = Deno.serve(
       {
         port: this.appConfig.port,
         onListen: (_: any) => this.onListen(_, this),
       },
       this.app.fetch
     );
+
+    this.__server = server;
+    this.__sigintListener = () => {
+      yelixClientLog('interrupted!');
+      this.kill();
+    };
+
+    Deno.addSignalListener('SIGINT', this.__sigintListener);
+  }
+
+  async kill() {
+    if (this.__server) {
+      await this.__server.shutdown();
+      Deno.removeSignalListener('SIGINT', this.__sigintListener);
+    } else {
+      yelixClientLog(
+        'You tried to kill the server but it was not running. This is fine.'
+      );
+    }
   }
 }
 

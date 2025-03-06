@@ -8,7 +8,10 @@
     "bump:patch": "deno run --allow-read --allow-write bump_version.ts patch",
     "bump:minor": "deno run --allow-read --allow-write bump_version.ts minor",
     "bump:major": "deno run --allow-read --allow-write bump_version.ts major",
-    "deploy": "deploy"
+    "deploy": "deploy",
+    "test": "deno test --allow-net --allow-read --allow-env",
+    "test:watch": "deno test --watch --allow-net --allow-read --allow-env",
+    "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env"
   },
   "imports": {
     "@std/fs": "jsr:@std/fs@^1.0.13",
