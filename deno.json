@@ -1,7 +1,7 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.12",
+  "version": "0.1.14",
   "license": "MIT",
   "tasks": {
     "dev": "deno run --watch --allow-net --allow-read --allow-env ./testing/main.ts",
