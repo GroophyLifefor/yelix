@@ -1,16 +1,5 @@
-import {
-  Yelix,
-  requestDataValidationMiddleware,
-  simpleLoggerMiddeware,
-  type Middleware,
-} from '@/mod.ts';
-import * as path from 'jsr:@std/path@1.0.8';
-
-const loggerMiddleware: Middleware = async (request, next, yelix) => {
-  yelix.log('New request to', request.ctx.req.path);
-  await next();
-  yelix.log('Request completed with', request.ctx.res.status);
-};
+import { requestDataValidationMiddleware, Yelix } from "@/mod.ts";
+import * as path from "jsr:@std/path@1.0.8";
 
 async function main() {
   const app = new Yelix({
@@ -19,22 +8,23 @@ async function main() {
   });
 
   app.initOpenAPI({
-    path: '/docs',
-    title: 'Yelix Testing API',
-    description: 'This is a testing API for Yelix',
+    path: "/docs",
+    title: "Yelix Testing API",
+    description: "This is a testing API for Yelix",
     servers: [
-      { 
-        url: 'http://localhost:3000', 
-        description: 'Local Server'
-      }],
-    excludeMethods: ['options'],
+      {
+        url: "http://localhost:3000",
+        description: "Local Server",
+      },
+    ],
+    excludeMethods: ["options"],
   });
 
   const currentDir = Deno.cwd();
-  const API_Folder = path.join(currentDir, 'testing', 'api');
+  const API_Folder = path.join(currentDir, "testing", "api");
   await app.loadEndpointsFromFolder(API_Folder);
 
-  app.setMiddleware('dataValidation', requestDataValidationMiddleware);
+  app.setMiddleware("dataValidation", requestDataValidationMiddleware);
 
   app.serve();
 }

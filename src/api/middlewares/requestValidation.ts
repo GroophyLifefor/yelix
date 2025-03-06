@@ -1,17 +1,17 @@
 // deno-lint-ignore-file no-explicit-any
-import type { ZodType } from 'zod';
-import type { Middleware } from '@/mod.ts';
+import type { ZodType } from "zod";
+import type { Middleware } from "@/mod.ts";
 
 const requestDataValidationMiddleware: Middleware = async (request) => {
   const zod = request.endpoint?.exports?.validation;
 
   if (!zod) {
     throw new Error(
-      'Validation schema is not defined for this endpoint. Please define a validation schema in the endpoint file.' +
-        request.endpoint?.path ||
-        '' + '.' ||
-        '' + request.endpoint?.methods ||
-        '' + '.'
+      "Validation schema is not defined for this endpoint. Please define a validation schema in the endpoint file." +
+          request.endpoint?.path ||
+        "" + "." ||
+        "" + request.endpoint?.methods ||
+        "" + ".",
     );
   }
 
@@ -27,30 +27,32 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
       const zv = queryModal[key];
       if (zv) {
         if (
-          zv?.constructor?.name === 'ZodType' ||
-          zv?.constructor?.name === 'ZodString'
+          zv?.constructor?.name === "ZodType" ||
+          zv?.constructor?.name === "ZodString"
         ) {
           const parsed = (zv as ZodType<any, any, any>).safeParse(value);
           query[key] = parsed.data;
-          const parsedErrors = JSON.parse(parsed.error?.message || '{}');
+          const parsedErrors = JSON.parse(parsed.error?.message || "{}");
           if (!parsed.success) {
             parsedErrors.forEach((error: { message: string }) => {
               errors.push({
-                message: `Invalid query parameter for '${key}', ${error.message}`,
+                message:
+                  `Invalid query parameter for '${key}', ${error.message}`,
               });
             });
           }
-        } else
+        } else {
           console.error(
-            'INTERNAL API VALIDATION ERROR ' +
-              '(Path: ' +
+            "INTERNAL API VALIDATION ERROR " +
+              "(Path: " +
               request.endpoint?.path +
-              ')' +
-              ', Invalid query parameter for',
+              ")" +
+              ", Invalid query parameter for",
             key,
             zv,
-            zv?.constructor?.name
+            zv?.constructor?.name,
           );
+        }
       }
     }
   }
@@ -61,23 +63,22 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
     try {
       bodyData = await request.ctx.req.json();
     } catch (_) {
-      const HTTPMethod = request.ctx.req.method || 'GET';
-      const isBodyNotAllowed = ['GET', 'DELETE', 'OPTIONS', 'HEAD'].includes(
-        HTTPMethod
+      const HTTPMethod = request.ctx.req.method || "GET";
+      const isBodyNotAllowed = ["GET", "DELETE", "OPTIONS", "HEAD"].includes(
+        HTTPMethod,
       );
 
       errors.push({
-        message:
-          'Invalid body, expected JSON.' +
+        message: "Invalid body, expected JSON." +
           (isBodyNotAllowed
             ? ` Body is not allowed for '${HTTPMethod}' method.`
-            : ''),
+            : ""),
       });
     }
 
     if (bodyData) {
       const parsed = bodyModal.safeParse(bodyData);
-      const parsedErrors = JSON.parse(parsed.error?.message || '{}');
+      const parsedErrors = JSON.parse(parsed.error?.message || "{}");
       body = parsed.data;
       if (!parsed.success) {
         parsedErrors.forEach(
@@ -89,7 +90,7 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
             message: string;
           }) => {
             const getMessage = () => {
-              if (error.code === 'invalid_type') {
+              if (error.code === "invalid_type") {
                 return `[${error.code}] Expected ${error.expected} but received ${error.received}. message: ${error.message}`;
               } else {
                 return `[${error.code}] ${error.message}`;
@@ -97,11 +98,10 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
             };
 
             errors.push({
-              message: `Invalid body property for '${
-                error.path
-              }'. ${getMessage()}`,
+              message:
+                `Invalid body property for '${error.path}'. ${getMessage()}`,
             });
-          }
+          },
         );
       }
     }
@@ -110,7 +110,7 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
   if (errors.length > 0) {
     return {
       base: {
-        responseStatus: 'end',
+        responseStatus: "end",
         status: 400,
         body: JSON.stringify({ errors }),
       },

@@ -1,26 +1,26 @@
-import { z } from 'zod';
+import { z } from "zod";
 import type {
   AddOpenAPIEndpointParams,
+  InitializeOpenAPIParams,
   OpenAPIPath,
   OpenAPISchema,
   OpenAPIType,
-  InitializeOpenAPIParams,
-} from './openAPI.types.ts';
+} from "./openAPI.types.ts";
 
 let openAPI: OpenAPIType = {
-  openapi: '3.1.0',
+  openapi: "3.1.0",
   info: {
-    title: '',
-    description: '',
-    version: '1.0.0',
+    title: "",
+    description: "",
+    version: "1.0.0",
   },
   servers: [],
   paths: {},
   components: {
     securitySchemes: {
       bearerAuth: {
-        type: 'http',
-        scheme: 'bearer',
+        type: "http",
+        scheme: "bearer",
         description:
           "Use Bearer Token for authorization. Format: 'Bearer <token>'",
       },
@@ -40,19 +40,19 @@ function initOpenAPI({
     openAPIExcludeMethods = excludeMethods;
   }
   openAPI = {
-    openapi: '3.1.0',
+    openapi: "3.1.0",
     info: {
       title,
       description,
-      version: '1.0.0',
+      version: "1.0.0",
     },
     servers: servers,
     paths: {},
     components: {
       securitySchemes: {
         bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
+          type: "http",
+          scheme: "bearer",
           description:
             "Use Bearer Token for authorization. Format: 'Bearer <token>'",
         },
@@ -62,15 +62,15 @@ function initOpenAPI({
 }
 
 function addOpenAPIEndpoint(
-  addOpenAPIEndpointParams: AddOpenAPIEndpointParams
+  addOpenAPIEndpointParams: AddOpenAPIEndpointParams,
 ) {
   if (openAPIExcludeMethods.includes(addOpenAPIEndpointParams.method)) {
     return;
   }
 
-  const operationId = `${
-    addOpenAPIEndpointParams.method
-  }_${addOpenAPIEndpointParams.path.replace(/[^a-zA-Z0-9]/g, '_')}`;
+  const operationId = `${addOpenAPIEndpointParams.method}_${
+    addOpenAPIEndpointParams.path.replace(/[^a-zA-Z0-9]/g, "_")
+  }`;
 
   const endpoint: OpenAPIPath = {
     [addOpenAPIEndpointParams.method]: {
@@ -78,34 +78,36 @@ function addOpenAPIEndpoint(
       operationId,
       parameters: addOpenAPIEndpointParams.inputs?.query
         ? Object.entries(addOpenAPIEndpointParams.inputs.query).map(
-            ([key, zodSchema]) => ({
-              name: key,
-              in: 'query',
-              required: !(zodSchema instanceof z.ZodOptional),
-              schema: zodToJsonSchema(zodSchema as z.ZodTypeAny),
-            })
-          )
+          ([key, zodSchema]) => ({
+            name: key,
+            in: "query",
+            required: !(zodSchema instanceof z.ZodOptional),
+            schema: zodToJsonSchema(zodSchema as z.ZodTypeAny),
+          }),
+        )
         : [],
       requestBody: addOpenAPIEndpointParams.inputs?.body
         ? {
-            required: true,
-            content: {
-              'application/json': {
-                schema: zodToJsonSchema(
-                  addOpenAPIEndpointParams.inputs.body as z.ZodTypeAny
-                ),
-              },
+          required: true,
+          content: {
+            "application/json": {
+              schema: zodToJsonSchema(
+                addOpenAPIEndpointParams.inputs.body as z.ZodTypeAny,
+              ),
             },
-          }
+          },
+        }
         : undefined,
       responses: {},
       tags: addOpenAPIEndpointParams.tags,
     },
   };
 
-  for (const [status, response] of Object.entries(
-    addOpenAPIEndpointParams.responses
-  )) {
+  for (
+    const [status, response] of Object.entries(
+      addOpenAPIEndpointParams.responses,
+    )
+  ) {
     const method = endpoint[addOpenAPIEndpointParams.method];
     if (method) {
       const schema = response.zodSchema
@@ -116,7 +118,7 @@ function addOpenAPIEndpoint(
         description: `Response for status code ${status}`,
         content: {
           [response.type]: {
-            schema: schema || { type: 'string' },
+            schema: schema || { type: "string" },
           },
         },
       };
@@ -130,20 +132,20 @@ function addOpenAPIEndpoint(
 }
 
 function zodToJsonSchema(zodSchema: z.ZodTypeAny): OpenAPISchema {
-  if (!zodSchema) return { type: 'object' };
+  if (!zodSchema) return { type: "object" };
   if (zodSchema instanceof z.ZodObject) {
     const properties: Record<string, OpenAPISchema> = {};
     Object.entries(zodSchema.shape).forEach(([key, value]) => {
       properties[key] = zodToJsonSchema(value as z.ZodTypeAny);
     });
-    return { type: 'object', properties };
+    return { type: "object", properties };
   }
-  return { type: 'string' };
+  return { type: "string" };
 }
 
 export {
-  openAPI,
-  initOpenAPI,
   addOpenAPIEndpoint,
   type InitializeOpenAPIParams,
+  initOpenAPI,
+  openAPI,
 };

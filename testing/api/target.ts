@@ -8,16 +8,16 @@ export const cache = new YelixCache<string>();
 
 // API endpoint handler
 export async function GET(ctx: Ctx) {
-  const requestData = ctx.get('dataValidation').user
+  const requestData = ctx.get("dataValidation").user;
   const query: QueryType = requestData.query;
 
   if (cache.has(ctx, query.name)) {
     const cachedData = cache.get(ctx, query.name)!;
-    return await ctx.text(cachedData + ' - (cached)', 200);
+    return await ctx.text(cachedData + " - (cached)", 200);
   }
 
-  const data = 'Hello, ' + query.name;
-  cache.set(ctx, query.name, data, '5s');
+  const data = "Hello, " + query.name;
+  cache.set(ctx, query.name, data, "5s");
 
   return await ctx.text(data, 200);
 }
@@ -25,12 +25,12 @@ export async function GET(ctx: Ctx) {
 // API endpoint configs
 // if path is not provided, it just a file
 // export const path = '/api/hello';
-export const middlewares = ['dataValidation'];
+export const middlewares = ["dataValidation"];
 
 // API endpoint data validation
 export const validation: ValidationType = {
   query: {
-    name: z.string()
+    name: z.string(),
   },
 };
 
@@ -38,10 +38,10 @@ export const validation: ValidationType = {
 export const openAPI: any = {
   description:
     "This endpoint returns a greeting message with the name provided in the query parameter.",
-  tags: ['Hello'],
+  tags: ["Hello"],
   responses: {
     201: {
-      type: 'application/json',
+      type: "application/json",
       zodSchema: z.string(),
     },
   },

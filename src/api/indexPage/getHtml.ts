@@ -7,11 +7,11 @@ type IndexPageParams = {
 
 export function serveIndexPage(params: IndexPageParams) {
   params.yelix.app.notFound((ctx: Ctx) => {
-    if (ctx.req.path === '/') {
+    if (ctx.req.path === "/") {
       return ctx.html(getHtml({ docsPath: params.docsPath }), 200);
     }
 
-    return new Response('Not Found', { status: 404 });
+    return new Response("Not Found", { status: 404 });
   });
 }
 
@@ -83,13 +83,13 @@ function getHtml({ docsPath }: {
     <h1>Welcome to Yelix</h1>
     <p>A powerful web server library</p>
     ${
-      docsPath
-        ? `<p>
+    docsPath
+      ? `<p>
             Lemme see your docs: 
             <a href="${docsPath}">${docsPath}</a>
           </p>`
-        : ''
-    }
+      : ""
+  }
   </div>
 </body>
 </html>

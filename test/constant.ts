@@ -1,6 +1,6 @@
 const constants = {
   testingPort: 3035,
-  url: '',
+  url: "",
 };
 
 constants.url = `http://localhost:${constants.testingPort}`;

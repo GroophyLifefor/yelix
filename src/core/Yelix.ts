@@ -1,30 +1,30 @@
 // deno-lint-ignore-file no-explicit-any
-import { Hono } from 'hono';
+import { Hono } from "hono";
 import {
   loadEndpoints,
   loadEndpointsFromFolder,
-} from '@/src/api/endpoints/loadEndpoints.ts';
-import { serveEndpoints } from '@/src/api/endpoints/serveEndpoints.ts';
+} from "@/src/api/endpoints/loadEndpoints.ts";
+import { serveEndpoints } from "@/src/api/endpoints/serveEndpoints.ts";
 import type {
   AppConfigType,
-  ParsedEndpoint,
-  Middleware,
-  OptionalAppConfigType,
   Endpoint,
-  MiddlewareList,
   InitOpenAPIParams,
-} from '@/src/types/types.d.ts';
-import { yelix_log, yelixClientLog } from '@/src/utils/logging.ts';
-import { sayWelcome } from '@/src/utils/welcome.ts';
-import version from '@/version.ts';
-import { simpleLoggerMiddeware } from '@/src/api/middlewares/simpleLogger.ts';
+  Middleware,
+  MiddlewareList,
+  OptionalAppConfigType,
+  ParsedEndpoint,
+} from "@/src/types/types.d.ts";
+import { yelix_log, yelixClientLog } from "@/src/utils/logging.ts";
+import { sayWelcome } from "@/src/utils/welcome.ts";
+import version from "@/version.ts";
+import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
 import {
   type InitializeOpenAPIParams,
   initOpenAPI,
   openAPI,
-} from '@/src/OpenAPI/index.ts';
-import { apiReference } from 'npm:@scalar/hono-api-reference@0.5.172';
-import { serveIndexPage } from '@/src/api/indexPage/getHtml.ts';
+} from "@/src/OpenAPI/index.ts";
+import { apiReference } from "npm:@scalar/hono-api-reference@0.5.172";
+import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 
 const defaultConfig: AppConfigType = {
   debug: false,
@@ -56,10 +56,12 @@ class Yelix {
     }
 
     if (!config.dontIncludeDefaultMiddlewares) {
-      this.setMiddleware('*', simpleLoggerMiddeware);
+      this.setMiddleware("*", simpleLoggerMiddeware);
     }
 
-    if (!this.appConfig.dontServeIndexPage) serveIndexPage({ yelix: this, docsPath: this.docsPath });
+    if (!this.appConfig.dontServeIndexPage) {
+      serveIndexPage({ yelix: this, docsPath: this.docsPath });
+    }
   }
 
   // this will be shown even not debug mode
@@ -69,9 +71,9 @@ class Yelix {
 
   log(...params: any): void {
     const props = [
-      '%c INFO %c',
-      'background-color: white; color: black;',
-      'background-color: inherit',
+      "%c INFO %c",
+      "background-color: white; color: black;",
+      "background-color: inherit",
       ...params,
     ];
     yelix_log(this, ...props);
@@ -79,9 +81,9 @@ class Yelix {
 
   warn(...params: any): void {
     const props = [
-      '%c WARN %c',
-      'background-color: orange;',
-      'background-color: inherit',
+      "%c WARN %c",
+      "background-color: orange;",
+      "background-color: inherit",
       ...params,
     ];
     yelix_log(this, ...props);
@@ -89,13 +91,13 @@ class Yelix {
 
   throw(...params: any): void {
     const props = [
-      '%c WARN %c',
-      'background-color: red;',
-      'background-color: inherit',
+      "%c WARN %c",
+      "background-color: red;",
+      "background-color: inherit",
       ...params,
     ];
     yelix_log(this, ...props);
-    console.error('❌', ...params);
+    console.error("❌", ...params);
     throw new Error(...params);
   }
 
@@ -111,10 +113,10 @@ class Yelix {
   }
 
   async loadEndpointsFromFolder(path: string): Promise<void> {
-    const isDenoDeploy = Deno.env.get('DENO_DEPLOYMENT_ID') !== undefined;
+    const isDenoDeploy = Deno.env.get("DENO_DEPLOYMENT_ID") !== undefined;
 
     if (isDenoDeploy) {
-      this.throw('Deno Deploy does not support dynamic imports');
+      this.throw("Deno Deploy does not support dynamic imports");
     }
 
     this.isLoadingEndpoints = true;
@@ -131,7 +133,7 @@ class Yelix {
     this.docsPath = path;
 
     this.__servedInformations.push({
-      title: 'OpenAPI Docs',
+      title: "OpenAPI Docs",
       description: path,
     });
 
@@ -143,58 +145,56 @@ class Yelix {
     };
     initOpenAPI(openAPIConfig);
 
-    this.app.get('/yelix-openapi-raw', (c) => {
+    this.app.get("/yelix-openapi-raw", (c) => {
       return c.json(openAPI, 200);
     });
 
     const defaultConfig = {
-      theme: 'saturn',
-      favicon: '/public/favicon.ico',
-      pageTitle: 'Yelix API Docs',
+      theme: "saturn",
+      favicon: "/public/favicon.ico",
+      pageTitle: "Yelix API Docs",
     };
     const apiReferenceConfig = Object.assign(
       defaultConfig,
-      config.apiReferenceConfig
+      config.apiReferenceConfig,
     );
 
-    apiReferenceConfig.spec = { url: '/yelix-openapi-raw' };
+    apiReferenceConfig.spec = { url: "/yelix-openapi-raw" };
 
     this.app.get(path, apiReference(apiReferenceConfig));
   }
 
   private __addLocalInformationToInitiate(addr: any) {
     const hostname = addr.hostname;
-    const isLocalhost = hostname === '0.0.0.0';
+    const isLocalhost = hostname === "0.0.0.0";
     const port = addr.port;
     const addrStr = isLocalhost
       ? `http://localhost:${port}`
       : `http://${hostname}:${port}`;
 
     this.__servedInformations.unshift({
-      title: 'Local',
+      title: "Local",
       description: addrStr,
     });
   }
 
-  private async onListen(addr: any, yelix: Yelix) {
+  private onListen(addr: any, yelix: Yelix) {
     this.__addLocalInformationToInitiate(addr);
-
-    
 
     const packageVersion = version;
 
     yelix.clientLog();
     yelix.clientLog(
-      '  %c 𝕐 Yelix %c' + packageVersion,
-      'color: orange;',
-      'color: inherit'
+      "  %c 𝕐 Yelix %c" + packageVersion,
+      "color: orange;",
+      "color: inherit",
     );
     const maxLength = Math.max(
-      ...this.__servedInformations.map((i) => i.title.length)
+      ...this.__servedInformations.map((i) => i.title.length),
     );
     this.__servedInformations.forEach((info) => {
       yelix.clientLog(
-        `   - ${info.title.padEnd(maxLength)}:   ${info.description}`
+        `   - ${info.title.padEnd(maxLength)}:   ${info.description}`,
       );
     });
     yelix.clientLog();
@@ -203,7 +203,7 @@ class Yelix {
   serve() {
     if (this.isLoadingEndpoints) {
       this.warn(
-        'Endpoints are still loading, you may not await the loadEndpointsFromFolder method'
+        "Endpoints are still loading, you may not await the loadEndpointsFromFolder method",
       );
     }
 
@@ -213,26 +213,26 @@ class Yelix {
         port: this.appConfig.port,
         onListen: (_: any) => this.onListen(_, this),
       },
-      this.app.fetch
+      this.app.fetch,
     );
 
     this.__server = server;
     this.__sigintListener = () => {
-      yelixClientLog('interrupted!');
+      yelixClientLog("interrupted!");
       this.kill();
       Deno.exit();
     };
 
-    Deno.addSignalListener('SIGINT', this.__sigintListener);
+    Deno.addSignalListener("SIGINT", this.__sigintListener);
   }
 
   async kill() {
     if (this.__server) {
       await this.__server.shutdown();
-      Deno.removeSignalListener('SIGINT', this.__sigintListener);
+      Deno.removeSignalListener("SIGINT", this.__sigintListener);
     } else {
       yelixClientLog(
-        'You tried to kill the server but it was not running. This is fine.'
+        "You tried to kill the server but it was not running. This is fine.",
       );
     }
   }

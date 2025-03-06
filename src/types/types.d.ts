@@ -1,9 +1,12 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Context } from 'hono';
-import type z from 'zod';
-import type { H } from 'hono/types';
+import type { Context } from "hono";
+import type z from "zod";
+import type { H } from "hono/types";
 import type { Yelix } from "@/mod.ts";
-import type { InitializeOpenAPIParams, OpenAPIDoc } from "@/src/OpenAPI/openAPI.types.ts";
+import type {
+  InitializeOpenAPIParams,
+  OpenAPIDoc,
+} from "@/src/OpenAPI/openAPI.types.ts";
 import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
 
 type Ctx = Context;
@@ -11,8 +14,8 @@ type Ctx = Context;
 type ValidationType = {
   query?:
     | {
-        [key: string]: z.ZodType<any, any, any> | string | undefined;
-      }
+      [key: string]: z.ZodType<any, any, any> | string | undefined;
+    }
     | undefined;
   body?: z.infer<any> | undefined;
 };
@@ -61,12 +64,20 @@ type OptionalAppConfigType = {
   [K in keyof AppConfigType]?: AppConfigType[K];
 };
 
-type Middleware = (request: ApplyMiddlewareParams, next: () => Promise<void>, yelix: Yelix) => Promise<Record<string, unknown>> | Record<string, unknown> | Promise<void> | void;
+type Middleware = (
+  request: ApplyMiddlewareParams,
+  next: () => Promise<void>,
+  yelix: Yelix,
+) =>
+  | Promise<Record<string, unknown>>
+  | Record<string, unknown>
+  | Promise<void>
+  | void;
 
 type MiddlewareList = {
   match: string | RegExp;
   middleware: Middleware;
-}
+};
 
 type QueryType = Record<string, any>;
 
@@ -76,18 +87,18 @@ type InitOpenAPIParams = {
 } & InitializeOpenAPIParams;
 
 export type {
-  Ctx,
-  ValidationType,
-  EndpointHandler,
-  Endpoint,
-  ParsedEndpoint,
   AppConfigType,
-  OptionalAppConfigType,
-  ParsedMethod,
   ApplyMiddlewareParams,
-  Middleware,
+  Ctx,
+  Endpoint,
+  EndpointHandler,
   ExportsType,
+  InitOpenAPIParams,
+  Middleware,
   MiddlewareList,
+  OptionalAppConfigType,
+  ParsedEndpoint,
+  ParsedMethod,
   QueryType,
-  InitOpenAPIParams
+  ValidationType,
 };

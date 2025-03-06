@@ -8,20 +8,20 @@ import constants from "@/test/constant.ts";
  * @param app Yelix application instance
  */
 export function debugRoutes(app: any) {
-  console.log('=== DEBUG ROUTE INFORMATION ===');
-  console.log('Endpoints registered in Yelix:', app.endpointList);
+  console.log("=== DEBUG ROUTE INFORMATION ===");
+  console.log("Endpoints registered in Yelix:", app.endpointList);
 
   // Try to access Hono's internal route registry
-  if (app.app && typeof app.app.routes === 'function') {
-    console.log('Hono routes:', app.app.routes());
+  if (app.app && typeof app.app.routes === "function") {
+    console.log("Hono routes:", app.app.routes());
   } else if (app.app && app.app._handlers) {
-    console.log('Hono handlers:', app.app._handlers);
+    console.log("Hono handlers:", app.app._handlers);
   } else {
-    console.log('Unable to access Hono route registry');
-    console.log('app.app structure:', Object.keys(app.app || {}));
+    console.log("Unable to access Hono route registry");
+    console.log("app.app structure:", Object.keys(app.app || {}));
   }
 
-  console.log('=== END DEBUG INFO ===');
+  console.log("=== END DEBUG INFO ===");
 }
 
 type TestParams = {
@@ -37,7 +37,7 @@ export function defaultBefore() {
     noWelcome: true,
   });
 
-  app.serve()
+  app.serve();
 
   return app;
 }
@@ -63,7 +63,7 @@ export function test(params: TestParams) {
         await params.after(data);
       }
     } catch (e) {
-      console.error('Test failed:', e);
+      console.error("Test failed:", e);
     }
   });
 }

@@ -1,8 +1,11 @@
-import type { Handler, Hono } from 'hono';
-import type { ParsedEndpoint } from '@/src/types/types.d.ts';
-import type { H } from 'hono/types';
-import type { Yelix } from '@/mod.ts';
-import type { AddOpenAPIEndpointParams, OpenAPIMethods } from "@/src/OpenAPI/openAPI.types.ts";
+import type { Handler, Hono } from "hono";
+import type { ParsedEndpoint } from "@/src/types/types.d.ts";
+import type { H } from "hono/types";
+import type { Yelix } from "@/mod.ts";
+import type {
+  AddOpenAPIEndpointParams,
+  OpenAPIMethods,
+} from "@/src/OpenAPI/openAPI.types.ts";
 import { addOpenAPIEndpoint } from "@/src/OpenAPI/index.ts";
 
 interface MethodMap {
@@ -12,7 +15,7 @@ interface MethodMap {
 function createMethodMap(app: Hono): MethodMap {
   // deno-lint-ignore no-explicit-any
   const options = (path: string, ...handlers: any[]) =>
-    app.on('OPTIONS', path, ...(handlers as [Handler]));
+    app.on("OPTIONS", path, ...(handlers as [Handler]));
 
   return {
     GET: app.get.bind(app),
@@ -37,7 +40,7 @@ function serveEndpoints(yelix: Yelix, endpointList: ParsedEndpoint[]) {
       const apiDoc: AddOpenAPIEndpointParams = {
         path: endpoint.path,
         method: method.method.toLocaleLowerCase() as OpenAPIMethods,
-        description: endpoint.openAPI?.description ?? '',
+        description: endpoint.openAPI?.description ?? "",
         inputs: endpoint.exports?.validation ?? {},
         responses: endpoint.openAPI?.responses ?? {},
         tags: endpoint.openAPI?.tags,

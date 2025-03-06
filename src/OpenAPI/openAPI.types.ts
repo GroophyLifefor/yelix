@@ -1,16 +1,16 @@
-import type { z } from 'zod';
-import type { ValidationType } from '@/mod.ts';
+import type { z } from "zod";
+import type { ValidationType } from "@/mod.ts";
 
 export type OpenAPIMethods =
-  | 'get'
-  | 'post'
-  | 'put'
-  | 'delete'
-  | 'patch'
-  | 'options'
-  | 'head'
-  | 'connect'
-  | 'trace';
+  | "get"
+  | "post"
+  | "put"
+  | "delete"
+  | "patch"
+  | "options"
+  | "head"
+  | "connect"
+  | "trace";
 
 export type OpenAPISchema = {
   type: string; // e.g., "string", "number", "array", etc.
@@ -23,15 +23,15 @@ export type OpenAPISchema = {
 
 export type OpenAPISecurityScheme = {
   bearerAuth: {
-    type: 'http';
-    scheme: 'bearer';
+    type: "http";
+    scheme: "bearer";
     description: "Use Bearer Token for authorization. Format: 'Bearer <token>'";
   };
 };
 
 export type OpenAPIParameter = {
   name: string; // Parameter name
-  in: 'query' | 'header' | 'path' | 'cookie'; // Parameter location
+  in: "query" | "header" | "path" | "cookie"; // Parameter location
   required: boolean; // Whether the parameter is required
   schema: OpenAPISchema; // Schema of the parameter
 };
@@ -40,7 +40,7 @@ export type OpenAPIRequestBody = {
   description?: string; // Optional description of the request body
   required: boolean; // Whether the request body is required
   content: Record<
-    string /* MIME type, e.g., "application/json" */,
+    string, /* MIME type, e.g., "application/json" */
     {
       schema: OpenAPISchema; // Schema of the request body
     }
@@ -50,7 +50,7 @@ export type OpenAPIRequestBody = {
 export type OpenAPIResponse = {
   description: string;
   content: Record<
-    string /* MIME type, e.g., "application/json" */,
+    string, /* MIME type, e.g., "application/json" */
     {
       schema: OpenAPISchema; // Schema of the response body
     }
@@ -63,7 +63,7 @@ export type OpenAPIPath = {
     operationId: string;
     parameters?: OpenAPIParameter[]; // Query, header, path, or cookie parameters
     requestBody?: OpenAPIRequestBody; // For methods like POST or PUT
-    responses: Record<string /* HTTP status code */, OpenAPIResponse>; // Response details
+    responses: Record<string, /* HTTP status code */ OpenAPIResponse>; // Response details
     tags?: string[]; // Optional tags for the endpoint
   };
 };
@@ -81,7 +81,7 @@ export type OpenAPIType = {
     version: string;
   };
   servers: OpenAPIServer[];
-  paths: Record<string /* Path, e.g., "/hello" */, OpenAPIPath>;
+  paths: Record<string, /* Path, e.g., "/hello" */ OpenAPIPath>;
   components: {
     securitySchemes: OpenAPISecurityScheme;
   };
@@ -103,7 +103,7 @@ export type AddOpenAPIEndpointParams = {
   path: string;
   method: OpenAPIMethods;
   inputs: ValidationType;
-  responses: Record<string /* status code */, AddOpenAPIEndpointResponseParams>;
+  responses: Record<string, /* status code */ AddOpenAPIEndpointResponseParams>;
   description: string;
   tags?: string[];
 };
