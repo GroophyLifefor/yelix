@@ -1,10 +1,11 @@
 @echo off
 REM get majority, '(p)atch', '(m)inor', 'major', '(n)one'
-set /p majority="Enter majority (p/m/major): "
+echo (p)atch, (m)inor, major, (n)one
+set /p majority="Enter majority (p/m/major/n): "
 if "%majority%"=="p" set majority=patch
 if "%majority%"=="m" set majority=minor
 if "%majority%"=="major" set majority=major
-if "%majority%"=="none" set majority=none
+if "%majority%"=="n" set majority=none
 
 if not "%majority%"=="none" (
   deno task bump:%majority%
