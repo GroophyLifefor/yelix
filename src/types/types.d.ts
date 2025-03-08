@@ -86,9 +86,27 @@ type InitOpenAPIParams = {
   apiReferenceConfig?: ApiReferenceOptions;
 } & InitializeOpenAPIParams;
 
+type CORSOptions = {
+  origin:
+    | string
+    | string[]
+    | ((origin: string, c: Context) => string | undefined | null);
+  allowMethods?: string[];
+  allowHeaders?: string[];
+  maxAge?: number;
+  credentials?: boolean;
+  exposeHeaders?: string[];
+};
+
+type CORSParams = {
+  affectRoute: string;
+} & CORSOptions;
+
 export type {
   AppConfigType,
   ApplyMiddlewareParams,
+  CORSOptions,
+  CORSParams,
   Ctx,
   Endpoint,
   EndpointHandler,

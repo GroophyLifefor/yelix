@@ -1,4 +1,6 @@
 import type {
+  CORSOptions,
+  CORSParams,
   Ctx,
   Endpoint,
   Middleware,
@@ -11,6 +13,8 @@ import { YelixCache } from "@/src/utils/cache.ts";
 import type { OpenAPIDoc } from "@/src/OpenAPI/openAPI.types.ts";
 
 export {
+  type CORSOptions,
+  type CORSParams,
   // types
   type Ctx,
   type Endpoint,

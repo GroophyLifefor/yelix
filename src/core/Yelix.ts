@@ -7,6 +7,7 @@ import {
 import { serveEndpoints } from "@/src/api/endpoints/serveEndpoints.ts";
 import type {
   AppConfigType,
+  CORSParams,
   Endpoint,
   InitOpenAPIParams,
   Middleware,
@@ -25,6 +26,7 @@ import {
 } from "@/src/OpenAPI/index.ts";
 import { apiReference } from "npm:@scalar/hono-api-reference@0.5.172";
 import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
+import { cors } from "hono/cors";
 
 const defaultConfig: AppConfigType = {
   debug: false,
@@ -198,6 +200,20 @@ class Yelix {
       );
     });
     yelix.clientLog();
+  }
+
+  cors(opt: CORSParams) {
+    this.app.use(
+      opt.affectRoute || "*",
+      cors({
+        origin: opt.origin,
+        allowMethods: opt.allowMethods,
+        allowHeaders: opt.allowHeaders,
+        maxAge: opt.maxAge,
+        credentials: opt.credentials,
+        exposeHeaders: opt.exposeHeaders,
+      }),
+    );
   }
 
   serve() {
