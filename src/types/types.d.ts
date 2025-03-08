@@ -99,7 +99,7 @@ type CORSOptions = {
 };
 
 type CORSParams = {
-  affectRoute: string;
+  affectRoute?: string;
 } & CORSOptions;
 
 export type {
