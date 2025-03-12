@@ -1,12 +1,13 @@
 import type { Handler, Hono } from "hono";
 import type { ParsedEndpoint } from "@/src/types/types.d.ts";
 import type { H } from "hono/types";
-import type { Yelix } from "@/mod.ts";
 import type {
-  AddOpenAPIEndpointParams,
+  AddOpenAPIEndpointResponseParams,
   OpenAPIMethods,
-} from "@/src/OpenAPI/openAPI.types.ts";
-import { addOpenAPIEndpoint } from "@/src/OpenAPI/index.ts";
+  OpenAPIYelixDoc,
+} from "@/src/OpenAPI/index.ts";
+import type { Yelix } from "@/src/core/Yelix.ts";
+import type { NewEndpointParams } from "@/src/OpenAPI/index.ts";
 
 interface MethodMap {
   [key: string]: (path: string, ...handlers: H[]) => void;
@@ -37,16 +38,23 @@ function serveEndpoints(yelix: Yelix, endpointList: ParsedEndpoint[]) {
     for (const method of methods) {
       yelix.log(`Serving ${method.method} ${endpoint.path}`);
 
-      const apiDoc: AddOpenAPIEndpointParams = {
+      const isHide = (endpoint?.openAPI as OpenAPIYelixDoc)?.hide ?? false;
+
+      const newAPIDoc: NewEndpointParams = {
         path: endpoint.path,
-        method: method.method.toLocaleLowerCase() as OpenAPIMethods,
+        method: method.method.toUpperCase() as OpenAPIMethods,
+        title: endpoint.openAPI?.title ?? "",
         description: endpoint.openAPI?.description ?? "",
-        inputs: endpoint.exports?.validation ?? {},
-        responses: endpoint.openAPI?.responses ?? {},
         tags: endpoint.openAPI?.tags,
+        responses: (endpoint.openAPI?.responses as Record<
+          string,
+          AddOpenAPIEndpointResponseParams
+        >) ?? {},
+        validation: endpoint.exports?.validation,
+        query: endpoint.openAPI?.query ?? {},
       };
 
-      addOpenAPIEndpoint(apiDoc);
+      if (!isHide) yelix.YelixOpenAPI?.addNewEndpoint(newAPIDoc);
 
       methodMap[method.method](endpoint.path, ...middlewares, async (c) => {
         const res = await method.handler(c);

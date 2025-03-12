@@ -21,6 +21,28 @@ export const middlewares = ["dataValidation"];
 // API endpoint data validation
 export const validation: ValidationType = {
   query: {
-    name: z.string(),
+    name: z.string().min(3).max(255).email(),
+  },
+};
+
+export const openAPI = {
+  description: "Returns a greeting message",
+  tags: ["General"],
+  // query: {
+  //   name: {
+  //     description: 'Name of the person',
+  //   },
+  // },
+  responses: {
+    200: {
+      type: "application/json",
+      zodSchema: z.object({
+        username: z.string(),
+        email: z.string().email(),
+        age: z.number().min(18).max(99),
+        friendNames: z.array(z.string()),
+        country: z.enum(["USA", "UK", "India"]),
+      }),
+    },
   },
 };

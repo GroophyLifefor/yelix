@@ -19,14 +19,10 @@ import { yelix_log, yelixClientLog } from "@/src/utils/logging.ts";
 import { sayWelcome } from "@/src/utils/welcome.ts";
 import version from "@/version.ts";
 import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
-import {
-  type InitializeOpenAPIParams,
-  initOpenAPI,
-  openAPI,
-} from "@/src/OpenAPI/index.ts";
 import { apiReference } from "npm:@scalar/hono-api-reference@0.5.172";
 import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 import { cors } from "hono/cors";
+import { YelixOpenAPI } from "@/src/OpenAPI/index.ts";
 
 const defaultConfig: AppConfigType = {
   debug: false,
@@ -42,6 +38,8 @@ class Yelix {
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
   docsPath?: string;
+  YelixOpenAPI?: YelixOpenAPI;
+
   private isLoadingEndpoints: boolean = false;
   private __server: any;
   // @type {HttpServer<NetAddr>}
@@ -62,7 +60,7 @@ class Yelix {
     }
 
     if (!this.appConfig.dontServeIndexPage) {
-      serveIndexPage({ yelix: this, docsPath: this.docsPath });
+      serveIndexPage({ yelix: this });
     }
   }
 
@@ -129,9 +127,8 @@ class Yelix {
     this.isLoadingEndpoints = false;
   }
 
-  initOpenAPI(config: InitOpenAPIParams): void {
-    const path = config.path;
-
+  initOpenAPI(config: InitOpenAPIParams) {
+    const path = config.path || "/docs";
     this.docsPath = path;
 
     this.__servedInformations.push({
@@ -139,17 +136,25 @@ class Yelix {
       description: path,
     });
 
-    const openAPIConfig: InitializeOpenAPIParams = {
-      title: config.title,
-      description: config.description,
-      servers: config.servers,
-      excludeMethods: config.excludeMethods,
-    };
-    initOpenAPI(openAPIConfig);
+    this.YelixOpenAPI = new YelixOpenAPI({
+      title: config.title || "Yelix API",
+      version: config.version || "1.0.0",
+      description: config.description || "Yelix API Documentation",
+    });
 
     this.app.get("/yelix-openapi-raw", (c) => {
-      return c.json(openAPI, 200);
+      return c.json(this.YelixOpenAPI!.getJSON(), 200);
     });
+
+    this.app.get(
+      this.docsPath,
+      apiReference({
+        theme: "saturn",
+        favicon: "/public/favicon.ico",
+        pageTitle: "Yelix API Docs",
+        spec: { url: "/yelix-openapi-raw" },
+      }),
+    );
 
     const defaultConfig = {
       theme: "saturn",

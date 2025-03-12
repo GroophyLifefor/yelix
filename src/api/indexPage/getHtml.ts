@@ -8,7 +8,7 @@ type IndexPageParams = {
 export function serveIndexPage(params: IndexPageParams) {
   params.yelix.app.notFound((ctx: Ctx) => {
     if (ctx.req.path === "/") {
-      return ctx.html(getHtml({ docsPath: params.docsPath }), 200);
+      return ctx.html(getHtml({ docsPath: params.yelix.docsPath }), 200);
     }
 
     return new Response("Not Found", { status: 404 });

@@ -10,7 +10,7 @@ import { requestDataValidationMiddleware } from "./src/api/middlewares/requestVa
 import { Yelix } from "@/src/core/Yelix.ts";
 import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
 import { YelixCache } from "@/src/utils/cache.ts";
-import type { OpenAPIDoc } from "@/src/OpenAPI/openAPI.types.ts";
+import type { OpenAPIDoc } from "@/src/OpenAPI/index.ts";
 
 export {
   type CORSOptions,

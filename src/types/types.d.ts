@@ -3,10 +3,7 @@ import type { Context } from "hono";
 import type z from "zod";
 import type { H } from "hono/types";
 import type { Yelix } from "@/mod.ts";
-import type {
-  InitializeOpenAPIParams,
-  OpenAPIDoc,
-} from "@/src/OpenAPI/openAPI.types.ts";
+import type { OpenAPIYelixDoc } from "@/src/OpenAPI/index.ts";
 import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
 
 type Ctx = Context;
@@ -31,7 +28,7 @@ type Endpoint = {
   PATCH?: EndpointHandler;
   middlewares?: string[];
   validation?: ValidationType;
-  openAPI?: OpenAPIDoc | undefined;
+  openAPI?: OpenAPIYelixDoc | undefined;
 };
 
 type ApplyMiddlewareParams = {
@@ -49,7 +46,7 @@ type ParsedEndpoint = {
   path: string;
   methods: ParsedMethod[];
   exports: ExportsType;
-  openAPI?: OpenAPIDoc;
+  openAPI?: OpenAPIYelixDoc;
 };
 
 type AppConfigType = {
@@ -81,11 +78,6 @@ type MiddlewareList = {
 
 type QueryType = Record<string, any>;
 
-type InitOpenAPIParams = {
-  path: string;
-  apiReferenceConfig?: ApiReferenceOptions;
-} & InitializeOpenAPIParams;
-
 type CORSOptions = {
   origin:
     | string
@@ -101,6 +93,15 @@ type CORSOptions = {
 type CORSParams = {
   affectRoute?: string;
 } & CORSOptions;
+
+type InitOpenAPIParams = {
+  path?: string;
+  title: string;
+  version?: string;
+  description?: string;
+  servers?: { url: string; description?: string }[];
+  apiReferenceConfig?: ApiReferenceOptions;
+};
 
 export type {
   AppConfigType,
