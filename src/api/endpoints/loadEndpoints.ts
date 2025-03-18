@@ -17,10 +17,18 @@ async function loadEndpointsFromFolder(yelix: Yelix, _path: string) {
   for (const file of files) {
     if (file.isFile) {
       yelix.log(`📄 Processing file: ${file.name}`);
-      const globePath = "file:" + path.join(_path, file.name);
-      const endpoint = await import(globePath);
-      yelix.log(`✅ Successfully imported endpoint from ${file.name}`);
-      endpoints.push(endpoint);
+      // Add cache busting query parameter to force reload
+      const cacheBuster = `?cacheBust=${Date.now()}`;
+      const globePath = "file:" + path.join(_path, file.name) + cacheBuster;
+
+      try {
+        // Force reload by bypassing cache
+        const endpoint = await import(globePath);
+        yelix.log(`✅ Successfully imported endpoint from ${file.name}`);
+        endpoints.push(endpoint);
+      } catch (err) {
+        yelix.warn(`Failed to import ${file.name}: ${err}`);
+      }
     }
   }
 

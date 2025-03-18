@@ -3,8 +3,8 @@
 echo.
 echo ------------------------------
 echo TESTING, I know no one likes to test, but it's important
-echo $ deno test
-deno test
+echo $ deno task test
+deno task test
 :testing_question
 set /p test="TESTING - Can I continue? (y/n/kill): "
 if "%test%"=="y" goto testing_continue

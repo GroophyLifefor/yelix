@@ -37,25 +37,6 @@ export const middlewares = ["dataValidation"];
 export const validation: ValidationType = {
   query: {
     name: z.string().min(1),
-    fullname: z.string().min(3).max(255),
-    username: z
-      .string()
-      .min(3)
-      .max(255)
-      .refine((value) => !/@/.test(value), {
-        message: "Username should not contain @",
-      })
-      .refine((value) => !/\s/.test(value), {
-        message: "Username should not contain whitespace",
-      })
-      .refine((value) => value === value.toLowerCase(), {
-        message: "Username should be lowercase",
-      }),
-    email: z.string().email(),
-    password: z.string().min(8).max(255),
-    acceptTermsAndConditions: z.boolean().refine((value) => value === true, {
-      message: "Terms and conditions should be accepted",
-    }),
   },
 };
 

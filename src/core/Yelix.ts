@@ -15,14 +15,14 @@ import type {
   OptionalAppConfigType,
   ParsedEndpoint,
 } from "@/src/types/types.d.ts";
-import { yelix_log, yelixClientLog } from "@/src/utils/logging.ts";
 import { sayWelcome } from "@/src/utils/welcome.ts";
-import version from "@/version.ts";
 import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
-import { apiReference } from "npm:@scalar/hono-api-reference@0.5.172";
 import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 import { cors } from "hono/cors";
-import { YelixOpenAPI } from "@/src/OpenAPI/index.ts";
+import { Logger } from "./Logger.ts";
+import { ServerManager } from "./ServerManager.ts";
+import { DocsManager } from "./DocsManager.ts";
+import { debounce } from "@/src/utils/debounce.ts";
 
 const defaultConfig: AppConfigType = {
   debug: false,
@@ -30,6 +30,13 @@ const defaultConfig: AppConfigType = {
   noWelcome: false,
   dontIncludeDefaultMiddlewares: false,
   dontServeIndexPage: false,
+  watchDir: undefined,
+};
+
+type ActionMeta = {
+  actionTitle: string;
+  actionFn: (...params: any[]) => any | Promise<any>;
+  actionParams: any[];
 };
 
 class Yelix {
@@ -37,19 +44,21 @@ class Yelix {
   endpointList: ParsedEndpoint[] = [];
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
-  docsPath?: string;
-  YelixOpenAPI?: YelixOpenAPI;
+  isFirstServe: boolean = true;
 
+  private docsManager: DocsManager;
+  private logger: Logger;
+  private serverManager: ServerManager;
   private isLoadingEndpoints: boolean = false;
-  private __server: any;
-  // @type {HttpServer<NetAddr>}
-  private __sigintListener: any;
-  private __servedInformations: { title: string; description: string }[] = [];
+  private actionMetaList: ActionMeta[] = [];
 
   constructor(appConfig?: OptionalAppConfigType) {
     const config = { ...defaultConfig, ...appConfig };
     this.appConfig = config;
     this.app = new Hono();
+    this.logger = new Logger(this, config.debug);
+    this.serverManager = new ServerManager(this, this.logger);
+    this.docsManager = new DocsManager(this.app);
 
     if (!config.noWelcome) {
       sayWelcome();
@@ -59,53 +68,56 @@ class Yelix {
       this.setMiddleware("*", simpleLoggerMiddeware);
     }
 
-    if (!this.appConfig.dontServeIndexPage) {
-      serveIndexPage({ yelix: this });
+    if (!config.dontServeIndexPage) {
+      serveIndexPage({ yelix: this, docsManager: this.docsManager });
+    }
+
+    if (config.watchDir) {
+      this.watch();
+      const afterWatchDir = config.watchDir
+        .replace(Deno.cwd(), ".")
+        .replaceAll("\\", "/");
+      this.serverManager.addServedInformation({
+        title: "Watching",
+        description: afterWatchDir,
+      });
     }
   }
 
-  // this will be shown even not debug mode
+  // Delegate logging methods to Logger
   clientLog(...params: any): void {
-    yelixClientLog(...params);
+    this.logger.clientLog(...params);
   }
 
   log(...params: any): void {
-    const props = [
-      "%c INFO %c",
-      "background-color: white; color: black;",
-      "background-color: inherit",
-      ...params,
-    ];
-    yelix_log(this, ...props);
+    this.logger.log(...params);
   }
 
   warn(...params: any): void {
-    const props = [
-      "%c WARN %c",
-      "background-color: orange;",
-      "background-color: inherit",
-      ...params,
-    ];
-    yelix_log(this, ...props);
+    this.logger.warn(...params);
   }
 
   throw(...params: any): void {
-    const props = [
-      "%c WARN %c",
-      "background-color: red;",
-      "background-color: inherit",
-      ...params,
-    ];
-    yelix_log(this, ...props);
-    console.error("❌", ...params);
-    throw new Error(...params);
+    this.logger.throw(...params);
   }
 
   setMiddleware(name: string | RegExp, middleware: Middleware) {
+    this.actionMetaList.push({
+      actionTitle: "setMiddleware",
+      actionFn: this.setMiddleware.bind(this),
+      actionParams: [name, middleware],
+    });
+
     this.middlewares.push({ match: name, middleware });
   }
 
   loadEndpoints(endpointEntries: Endpoint[]) {
+    this.actionMetaList.push({
+      actionTitle: "loadEndpoints",
+      actionFn: this.loadEndpoints.bind(this),
+      actionParams: [endpointEntries],
+    });
+
     const endpoints = loadEndpoints(this, endpointEntries);
     endpoints.forEach((endpoint) => {
       this.endpointList.push(endpoint);
@@ -120,6 +132,13 @@ class Yelix {
     }
 
     this.isLoadingEndpoints = true;
+
+    this.actionMetaList.push({
+      actionTitle: "loadEndpointsFromFolder",
+      actionFn: this.loadEndpointsFromFolder.bind(this),
+      actionParams: [path],
+    });
+
     const endpoints = await loadEndpointsFromFolder(this, path);
     endpoints.forEach((endpoint) => {
       this.endpointList.push(endpoint);
@@ -128,86 +147,23 @@ class Yelix {
   }
 
   initOpenAPI(config: InitOpenAPIParams) {
-    const path = config.path || "/docs";
-    this.docsPath = path;
-
-    this.__servedInformations.push({
-      title: "OpenAPI Docs",
-      description: path,
+    this.actionMetaList.push({
+      actionTitle: "initOpenAPI",
+      actionFn: this.initOpenAPI.bind(this),
+      actionParams: [config],
     });
 
-    this.YelixOpenAPI = new YelixOpenAPI({
-      title: config.title || "Yelix API",
-      version: config.version || "1.0.0",
-      description: config.description || "Yelix API Documentation",
-    });
-
-    this.app.get("/yelix-openapi-raw", (c) => {
-      return c.json(this.YelixOpenAPI!.getJSON(), 200);
-    });
-
-    this.app.get(
-      this.docsPath,
-      apiReference({
-        theme: "saturn",
-        favicon: "/public/favicon.ico",
-        pageTitle: "Yelix API Docs",
-        spec: { url: "/yelix-openapi-raw" },
-      }),
-    );
-
-    const defaultConfig = {
-      theme: "saturn",
-      favicon: "/public/favicon.ico",
-      pageTitle: "Yelix API Docs",
-    };
-    const apiReferenceConfig = Object.assign(
-      defaultConfig,
-      config.apiReferenceConfig,
-    );
-
-    apiReferenceConfig.spec = { url: "/yelix-openapi-raw" };
-
-    this.app.get(path, apiReference(apiReferenceConfig));
-  }
-
-  private __addLocalInformationToInitiate(addr: any) {
-    const hostname = addr.hostname;
-    const isLocalhost = hostname === "0.0.0.0";
-    const port = addr.port;
-    const addrStr = isLocalhost
-      ? `http://localhost:${port}`
-      : `http://${hostname}:${port}`;
-
-    this.__servedInformations.unshift({
-      title: "Local",
-      description: addrStr,
-    });
-  }
-
-  private onListen(addr: any, yelix: Yelix) {
-    this.__addLocalInformationToInitiate(addr);
-
-    const packageVersion = version;
-
-    yelix.clientLog();
-    yelix.clientLog(
-      "  %c 𝕐 Yelix %c" + packageVersion,
-      "color: orange;",
-      "color: inherit",
-    );
-    const maxLength = Math.max(
-      ...this.__servedInformations.map((i) => i.title.length),
-    );
-    this.__servedInformations.forEach((info) => {
-      yelix.clientLog(
-        `   - ${info.title.padEnd(maxLength)}:   ${info.description}`,
-      );
-    });
-    yelix.clientLog();
+    const info = this.docsManager.initOpenAPI(config);
+    this.serverManager.addServedInformation(info);
   }
 
   cors(opt: CORSParams) {
+    this.actionMetaList.push({
+      actionTitle: "cors",
+      actionFn: this.cors.bind(this),
+      actionParams: [opt],
+    });
+
     this.app.use(
       opt.affectRoute || "*",
       cors({
@@ -221,40 +177,120 @@ class Yelix {
     );
   }
 
-  serve() {
+  async serve() {
+    this.actionMetaList.push({
+      actionTitle: "serve",
+      actionFn: this.serve.bind(this),
+      actionParams: [],
+    });
+
     if (this.isLoadingEndpoints) {
       this.warn(
         "Endpoints are still loading, you may not await the loadEndpointsFromFolder method",
       );
     }
 
-    serveEndpoints(this, this.endpointList);
-    const server = Deno.serve(
-      {
-        port: this.appConfig.port,
-        onListen: (_: any) => this.onListen(_, this),
-      },
-      this.app.fetch,
-    );
-
-    this.__server = server;
-    this.__sigintListener = () => {
-      yelixClientLog("interrupted!");
-      this.kill();
-      Deno.exit();
-    };
-
-    Deno.addSignalListener("SIGINT", this.__sigintListener);
+    serveEndpoints(this, this.docsManager, this.endpointList);
+    await this.serverManager.startServer(this.appConfig.port, this.app.fetch);
+    this.isFirstServe = false;
   }
 
-  async kill() {
-    if (this.__server) {
-      await this.__server.shutdown();
-      Deno.removeSignalListener("SIGINT", this.__sigintListener);
-    } else {
-      yelixClientLog(
-        "You tried to kill the server but it was not running. This is fine.",
+  async kill(forceAfterMs = 3000) {
+    await this.serverManager.kill(forceAfterMs);
+  }
+
+  async watch() {
+    if (typeof this.appConfig.watchDir !== "string") {
+      this.throw("watchDir is not defined in appConfig");
+      return;
+    }
+
+    let _events: Deno.FsEvent[] = [];
+    const log = debounce(() => {
+      const rawEvents = _events;
+      _events = [];
+
+      // remove duplicate events
+      const events = rawEvents.filter((event, index, self) => {
+        return index === self.findIndex((t) => t.paths[0] === event.paths[0]);
+      });
+
+      for (const event of events) {
+        const afterWatchDir = event.paths[0].replace(
+          this.appConfig.watchDir!,
+          "",
+        );
+        console.log("⊚ [%s] %s", event.kind, afterWatchDir);
+      }
+      this.restartEndpoints();
+    }, 200);
+
+    const watcher = Deno.watchFs(this.appConfig.watchDir);
+
+    for await (const event of watcher) {
+      log();
+      _events.push(event);
+    }
+  }
+
+  async restartEndpoints() {
+    try {
+      this.logger.clientLog("╓ Restarting server...");
+      const startms = performance.now();
+
+      // Step 1: Gracefully shutdown the current server
+      this.logger.log("║ Shutting down current server...");
+      await this.kill(0);
+
+      // Step 2: Reset application state
+      this.logger.log("║ Resetting application state...");
+      this.app = new Hono();
+      this.serverManager = new ServerManager(this, this.logger);
+      this.docsManager = new DocsManager(this.app);
+      this.middlewares = [];
+      this.endpointList = [];
+
+      // Step 3: Save pending actions and clear queue
+      const actions = [...this.actionMetaList];
+      this.actionMetaList = [];
+
+      // Step 4: Setup initial configuration
+      if (!this.appConfig.dontServeIndexPage) {
+        serveIndexPage({ yelix: this, docsManager: this.docsManager });
+      }
+
+      // Step 5: Replay actions in order
+      for (const meta of actions) {
+        this.logger.log(`║ Running ${meta.actionTitle}...`);
+        await meta.actionFn(...meta.actionParams);
+      }
+
+      // Step 6: Ensure server gets restarted by explicitly calling serve
+      // Find if serve was already called in actions
+      const serveActionExists = actions.some((a) => a.actionTitle === "serve");
+
+      if (!serveActionExists) {
+        this.logger.log("║ Restarting server...");
+        await this.serve();
+      }
+
+      const endms = performance.now();
+      this.logger.clientLog(
+        "╙ Server restarted successfully in",
+        Math.round(endms - startms),
+        "ms (+200ms debounce)",
       );
+    } catch (error) {
+      this.logger.throw("Error during server restart:", error);
+
+      // Attempt recovery
+      this.logger.clientLog("Attempting recovery...");
+      try {
+        await this.serve();
+        this.logger.clientLog("Recovery successful");
+      } catch (recoveryError) {
+        this.logger.throw("Recovery failed:", recoveryError);
+      }
     }
   }
 }

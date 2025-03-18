@@ -8,6 +8,7 @@ import type {
 } from "@/src/OpenAPI/index.ts";
 import type { Yelix } from "@/src/core/Yelix.ts";
 import type { NewEndpointParams } from "@/src/OpenAPI/index.ts";
+import type { DocsManager } from "@/src/core/DocsManager.ts";
 
 interface MethodMap {
   [key: string]: (path: string, ...handlers: H[]) => void;
@@ -28,7 +29,11 @@ function createMethodMap(app: Hono): MethodMap {
   };
 }
 
-function serveEndpoints(yelix: Yelix, endpointList: ParsedEndpoint[]) {
+function serveEndpoints(
+  yelix: Yelix,
+  docsManager: DocsManager,
+  endpointList: ParsedEndpoint[],
+) {
   const methodMap = createMethodMap(yelix.app);
 
   for (const endpoint of endpointList) {
@@ -54,7 +59,7 @@ function serveEndpoints(yelix: Yelix, endpointList: ParsedEndpoint[]) {
         query: endpoint.openAPI?.query ?? {},
       };
 
-      if (!isHide) yelix.YelixOpenAPI?.addNewEndpoint(newAPIDoc);
+      if (!isHide) docsManager.YelixOpenAPI?.addNewEndpoint(newAPIDoc);
 
       methodMap[method.method](endpoint.path, ...middlewares, async (c) => {
         const res = await method.handler(c);

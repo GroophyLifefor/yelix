@@ -17,7 +17,7 @@ type ValidationType = {
   body?: z.infer<any> | undefined;
 };
 
-type EndpointHandler = (ctx: Ctx) => Promise<any>;
+type EndpointHandler = (ctx: Ctx) => Promise<any> | any;
 
 type Endpoint = {
   path: string;
@@ -55,6 +55,7 @@ type AppConfigType = {
   noWelcome: boolean;
   dontIncludeDefaultMiddlewares: boolean;
   dontServeIndexPage: boolean;
+  watchDir: string | undefined;
 };
 
 type OptionalAppConfigType = {

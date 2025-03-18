@@ -1,11 +1,12 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
-    "dev": "deno run --watch --allow-net --allow-read --allow-env ./testing/main.ts",
+    "dev": "deno run --allow-net --allow-read --allow-env ./testing/main.ts",
+    "dev:watch": "deno run --watch --allow-net --allow-read --allow-env ./testing/main.ts",
     "bump:patch": "deno run --allow-read --allow-write bump_version.ts patch",
     "bump:minor": "deno run --allow-read --allow-write bump_version.ts minor",
     "bump:major": "deno run --allow-read --allow-write bump_version.ts major",
