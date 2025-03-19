@@ -48,7 +48,7 @@ export class DocsManager {
     };
   }
 
-  getOpenAPI() {
+  getOpenAPI(): YelixOpenAPI | undefined {
     return this.YelixOpenAPI;
   }
 }

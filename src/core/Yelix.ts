@@ -45,8 +45,8 @@ class Yelix {
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
   isFirstServe: boolean = true;
+  docsManager: DocsManager;
 
-  private docsManager: DocsManager;
   private logger: Logger;
   private serverManager: ServerManager;
   private isLoadingEndpoints: boolean = false;

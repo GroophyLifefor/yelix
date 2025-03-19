@@ -1,6 +1,7 @@
 import {
   type Ctx,
   type Endpoint,
+  type Middleware,
   requestDataValidationMiddleware,
   Yelix,
 } from "@/mod.ts";
@@ -37,6 +38,12 @@ async function main() {
     },
   };
   app.loadEndpoints([hello]);
+
+  const middleware: Middleware = (ctx, next) => {
+    console.log("Middleware", ctx);
+    return next();
+  };
+  app.setMiddleware("test", middleware);
 
   app.setMiddleware("dataValidation", requestDataValidationMiddleware);
 
