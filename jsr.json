@@ -1,6 +1,6 @@
 {
   "name": "@murat/yelix",
-  "version": "0.1.22",
+  "version": "0.1.23",
   "license": "MIT",
   "exports": {
     ".": "./mod.ts",
@@ -20,7 +20,8 @@
       "src/validation/*.ts",
       "src/**/*.ts",
       "mod.ts",
-      "version.ts"
+      "version.ts",
+      "readme.md"
     ],
     "exclude": []
   }

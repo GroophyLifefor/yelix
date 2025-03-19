@@ -45,8 +45,8 @@ echo ------------------------------
 echo.
 echo ------------------------------
 echo BUILD, it's time to build your project
-echo $ deno publish --dry-run
-deno publish --dry-run
+echo $ deno publish --dry-run --allow-dirty
+deno publish --dry-run --allow-dirty
 :build_question
 set /p build="BUILD - Can I continue? (y/n): "
 if "%build%"=="y" goto build_continue
