@@ -22,6 +22,7 @@ export class DocsManager {
       title: config.title || "Yelix API",
       version: config.version || "1.0.0",
       description: config.description || "Yelix API Documentation",
+      servers: config.servers || [],
     });
 
     this.app.get("/yelix-openapi-raw", (c) => {

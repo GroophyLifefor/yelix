@@ -28,7 +28,15 @@ async function main() {
         url: "http://localhost:3030",
         description: "Local Server",
       },
+      {
+        url: "http://localhost:3080",
+        description: "Test Server",
+      },
     ],
+  });
+
+  app.docsManager.YelixOpenAPI?.customValidationDescription("min", () => {
+    return "hello world!";
   });
 
   const hello: Endpoint = {

@@ -698,6 +698,7 @@ type OpenAPIParams = {
   version: string;
   title: string;
   description?: string;
+  servers?: OpenAPIServer[];
 };
 
 type AddOpenAPIEndpointResponseParams = {

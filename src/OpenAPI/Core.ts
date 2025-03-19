@@ -16,6 +16,7 @@ class YelixOpenAPI {
         description: params.description || "Yelix API Documentation",
       },
       paths: {},
+      servers: params.servers || [],
     };
   }
 
