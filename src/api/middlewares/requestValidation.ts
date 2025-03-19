@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
 import type { ZodType } from "zod";
-import type { Middleware } from "@/mod.ts";
+import type { Middleware, YelixValidationBase } from "@/mod.ts";
 
 const requestDataValidationMiddleware: Middleware = async (request) => {
   const zod = request.endpoint?.exports?.validation;
@@ -18,6 +18,7 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
   const errors: any = [];
   const query: any = {};
   let body: any = {};
+  const formData: any = {};
 
   const queryModal = zod?.query;
   if (queryModal) {
@@ -107,6 +108,48 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
     }
   }
 
+  const formDataModal:
+    | {
+      [key: string]: YelixValidationBase;
+    }
+    | undefined = zod?.formData;
+  let formDatas = undefined;
+  if (formDataModal) {
+    try {
+      formDatas = await request.ctx.req.formData();
+    } catch (_) {
+      errors.push({
+        message: "Invalid form data, expected form data.",
+      });
+    }
+  }
+
+  if (formDataModal && formDatas) {
+    const keys = Object.keys(formDataModal);
+
+    for (const key of keys) {
+      const validater = formDataModal[key];
+
+      const getType = validater.getType;
+      const data = getType === "get"
+        ? formDatas.get(key)
+        : formDatas.getAll(key);
+      const parsed = validater.validate(data);
+
+      if (parsed.errors.length > 0) {
+        errors.push({
+          message: `Invalid form data for '${key}', ${
+            parsed.errors.join(
+              ", ",
+            )
+          }`,
+        });
+      }
+
+      formData[key] = parsed.value;
+    }
+  }
+
   if (errors.length > 0) {
     return {
       base: {
@@ -122,6 +165,7 @@ const requestDataValidationMiddleware: Middleware = async (request) => {
     user: {
       query,
       body,
+      formData,
     },
   };
 };

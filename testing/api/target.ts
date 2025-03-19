@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 import type { Ctx, ValidationType } from "@/mod.ts";
-import z from "zod";
 import type { QueryType } from "@/src/types/types.d.ts";
 import { YelixCache } from "@/src/utils/cache.ts";
+import z from "zod";
 
 export const cache = new YelixCache<string>();
 

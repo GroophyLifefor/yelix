@@ -1,7 +1,7 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.21",
+  "version": "0.1.22",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
@@ -23,5 +23,15 @@
     "hono-openapi": "npm:hono-openapi@^0.4.4",
     "zod": "npm:zod@^3.24.1",
     "@/": "./"
+  },
+  "publish": {
+    "include": [
+      "src/validation/validation.ts",
+      "src/validation/*.ts",
+      "src/**/*.ts",
+      "mod.ts",
+      "version.ts"
+    ],
+    "exclude": []
   }
 }

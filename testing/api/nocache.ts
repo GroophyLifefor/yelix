@@ -21,7 +21,7 @@ export const middlewares = ["dataValidation"];
 // API endpoint data validation
 export const validation: ValidationType = {
   query: {
-    name: z.string().min(3).max(255).email(),
+    name: z.string(),
   },
 };
 

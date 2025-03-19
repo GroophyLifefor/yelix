@@ -44,6 +44,19 @@ echo ------------------------------
 
 echo.
 echo ------------------------------
+echo BUILD, it's time to build your project
+echo $ deno publish --dry-run
+deno publish --dry-run
+:build_question
+set /p build="BUILD - Can I continue? (y/n): "
+if "%build%"=="y" goto build_continue
+if "%build%"=="n" goto end
+goto build_question
+:build_continue
+echo ------------------------------
+
+echo.
+echo ------------------------------
 REM get majority, '(p)atch', '(m)inor', 'major', '(n)one'
 echo (p)atch, (m)inor, major, (n)one, kill
 set /p majority="Enter majority (p/m/major/n/kill): "
@@ -86,8 +99,8 @@ echo ------------------------------
 
 echo.
 echo ------------------------------
-echo BUILD, it's time to build your project
-echo $ deno publish  --dry-run
+echo AGAIN BUILD AFTER COMMIT, it's time to build your project
+echo $ deno publish --dry-run
 deno publish --dry-run
 :build_question
 set /p build="BUILD - Can I continue? (y/n): "
