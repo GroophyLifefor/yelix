@@ -13,7 +13,8 @@
     "deploy": "deploy",
     "test": "deno test --allow-net --allow-read --allow-env",
     "test:watch": "deno test --watch --allow-net --allow-read --allow-env",
-    "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env"
+    "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env",
+    "test:coverage-html": "deno task test:coverage && deno coverage --html"
   },
   "imports": {
     "@std/fs": "jsr:@std/fs@^1.0.13",
