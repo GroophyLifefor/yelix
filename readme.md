@@ -115,7 +115,8 @@ improve Yelix.
 
 ## Early Supporters
 
-[@erenkulaksiz](https://github.com/erenkulaksiz), [@mertssmnoglu](https://github.com/mertssmnoglu)
+[@erenkulaksiz](https://github.com/erenkulaksiz),
+[@mertssmnoglu](https://github.com/mertssmnoglu)
 
 ## License
 

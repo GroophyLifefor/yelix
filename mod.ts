@@ -22,7 +22,7 @@ import {
   type RuleResult,
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
-import { YelixTestClient } from "@/src/test/testClient.ts";
+import { request, YelixTestClient } from "@/src/test/testClient.ts";
 
 export {
   type CORSOptions,
@@ -33,6 +33,7 @@ export {
   inp,
   type Middleware,
   type OpenAPIDoc,
+  request,
   // middlewares
   requestDataValidationMiddleware,
   simpleLoggerMiddeware,
@@ -41,7 +42,7 @@ export {
   Yelix,
   YelixCache,
   YelixInput,
+  YelixTestClient,
   YelixValidationBase,
-  YelixTestClient
 };
 export type { FailedMessage, InferYelixSchema, Rule, RuleResult };

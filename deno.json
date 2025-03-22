@@ -1,7 +1,7 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.25",
+  "version": "0.1.26",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
@@ -11,10 +11,10 @@
     "bump:minor": "deno run --allow-read --allow-write bump_version.ts minor",
     "bump:major": "deno run --allow-read --allow-write bump_version.ts major",
     "deploy": "deploy",
-    "test": "deno test --allow-net --allow-read --allow-env",
+    "test": "deno test --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:testing": "deno test --allow-net --allow-read --allow-env ./testing",
-    "test:watch": "deno test --watch --allow-net --allow-read --allow-env",
-    "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env",
+    "test:watch": "deno test --watch --allow-net --allow-read --allow-env --ignore=./testing/",
+    "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:coverage-html": "deno task test:coverage && deno coverage --html"
   },
   "imports": {

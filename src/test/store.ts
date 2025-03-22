@@ -29,7 +29,6 @@ export class Store<T = any> {
   }
 }
 
-
 interface ExpireableStoreItem<T> {
   value: T;
   expireAt: number;
@@ -44,7 +43,10 @@ export class ExpireableStore<T = any> {
   }
 
   set(key: string, value: T): void {
-    const item: ExpireableStoreItem<T> = { value, expireAt: Date.now() + this.ttl };
+    const item: ExpireableStoreItem<T> = {
+      value,
+      expireAt: Date.now() + this.ttl,
+    };
     this.storage.set(key, item);
   }
 
