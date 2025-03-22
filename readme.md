@@ -113,6 +113,10 @@ Deploy, use the `loadEndpoints` method instead.
 Contributions are welcome! Feel free to submit issues or pull requests to
 improve Yelix.
 
+## Early Supporters
+
+[@erenkulaksiz](https://github.com/erenkulaksiz), [@mertssmnoglu](https://github.com/mertssmnoglu)
+
 ## License
 
 Yelix is licensed under the MIT License.
