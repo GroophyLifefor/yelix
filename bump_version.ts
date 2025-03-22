@@ -25,7 +25,7 @@ async function bumpVersion(type: "patch" | "minor" | "major") {
     await Deno.writeTextFile(
       "version.ts",
       `
-const version = '${json.version}';
+const version = "${json.version}";
 export default version;
       `.trim() + "\n",
     );
