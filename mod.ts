@@ -22,6 +22,7 @@ import {
   type RuleResult,
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
+import { YelixTestClient } from "@/src/test/testClient.ts";
 
 export {
   type CORSOptions,
@@ -41,5 +42,6 @@ export {
   YelixCache,
   YelixInput,
   YelixValidationBase,
+  YelixTestClient
 };
 export type { FailedMessage, InferYelixSchema, Rule, RuleResult };
