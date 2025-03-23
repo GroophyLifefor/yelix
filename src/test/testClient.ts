@@ -1,13 +1,13 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Yelix } from '@/src/core/Yelix.ts';
+import type { Yelix } from "@/src/core/Yelix.ts";
 
 /**
  * Represents the type of response received from the server
  * @enum {string}
  */
 enum ResponseType {
-  JSON = 'json',
-  TEXT = 'text',
+  JSON = "json",
+  TEXT = "text",
 }
 
 /**
@@ -52,19 +52,19 @@ function debugRoutes(app: Yelix): void {
   const honoApp: any = app.app;
 
   if (!honoApp) {
-    console.error('No Hono app instance found');
+    console.error("No Hono app instance found");
     return;
   }
 
-  if (typeof honoApp.routes === 'function') {
+  if (typeof honoApp.routes === "function") {
     debugInfo.honoRoutes = honoApp.routes();
   } else if (honoApp._handlers) {
     debugInfo.honoRoutes = honoApp._handlers;
   }
 
-  console.log('=== DEBUG ROUTE INFORMATION ===');
+  console.log("=== DEBUG ROUTE INFORMATION ===");
   console.table(debugInfo);
-  console.log('=== END DEBUG INFO ===');
+  console.log("=== END DEBUG INFO ===");
 }
 
 /**
@@ -72,7 +72,7 @@ function debugRoutes(app: Yelix): void {
  * @internal
  */
 async function handleResponse(
-  res: Response
+  res: Response,
 ): Promise<{ response: any; type: ResponseType }> {
   try {
     const clone = res.clone();
@@ -119,11 +119,11 @@ async function handleResponse(
 async function request(
   app: Yelix,
   path: string,
-  config: Config
+  config: Config,
 ): Promise<YelixResponse> {
   const hono = app.app;
   if (!hono) {
-    throw new Error('Yelix application instance not initialized');
+    throw new Error("Yelix application instance not initialized");
   }
 
   const res = await hono.request(path, config);
@@ -134,10 +134,9 @@ async function request(
   const { response, type } = await handleResponse(res);
 
   // Log request details
-  const requestBody =
-    config?.body && typeof config.body === 'string'
-      ? JSON.parse(config.body)
-      : {};
+  const requestBody = config?.body && typeof config.body === "string"
+    ? JSON.parse(config.body)
+    : {};
 
   if (config?.logging !== false) {
     console.log({
@@ -160,4 +159,4 @@ async function request(
   };
 }
 
-export { debugRoutes, request, type YelixResponse, ResponseType };
+export { debugRoutes, request, ResponseType, type YelixResponse };
