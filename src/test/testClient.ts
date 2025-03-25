@@ -1,72 +1,162 @@
 // deno-lint-ignore-file no-explicit-any
 import type { Yelix } from "@/src/core/Yelix.ts";
 
+/**
+ * Represents the type of response received from the server
+ * @enum {string}
+ */
+enum ResponseType {
+  JSON = "json",
+  TEXT = "text",
+}
+
+/**
+ * Interface representing the structure of a Yelix response
+ * @template T The type of the JSON response data
+ * @example
+ * type HelloResponse = { message: string };
+ * const response: YelixResponse<HelloResponse>;
+ */
+interface YelixResponse<T = any> {
+  req: Response;
+  res: {
+    responseType: ResponseType;
+    text: string;
+    json: T;
+  };
+}
+
+/**
+ * Configuration type extending RequestInit with required method
+ */
 type Config = {
   method: string;
+  logging?: boolean;
 } & RequestInit;
 
-class YelixTestClient {
-  private app: Yelix | null = null;
+/**
+ * Debug utility to print route information from both Yelix and Hono
+ * @param app The Yelix application instance
+ * @example
+ * ```typescript
+ * const app = new Yelix();
+ * debugRoutes(app);
+ * ```
+ */
+function debugRoutes(app: Yelix): void {
+  const debugInfo = {
+    yelixEndpoints: app.endpointList,
+    honoRoutes: null as any,
+  };
 
-  debugRoutes() {
-    const app: any = this.app;
-    if (!app) {
-      throw new Error("No app found");
-    }
-    console.log("=== DEBUG ROUTE INFORMATION ===");
-    console.log("Endpoints registered in Yelix:", app.endpointList);
+  const honoApp: any = app.app;
 
-    // Try to access Hono's internal route registry
-    if (app.app && typeof app.app.routes === "function") {
-      console.log("Hono routes:", app.app.routes());
-    } else if (app.app && app.app._handlers) {
-      console.log("Hono handlers:", app.app._handlers);
-    } else {
-      console.log("Unable to access Hono route registry");
-      console.log("app.app structure:", Object.keys(app.app || {}));
-    }
+  if (!honoApp) {
+    console.error("No Hono app instance found");
+    return;
+  }
 
-    console.log("=== END DEBUG INFO ===");
+  if (typeof honoApp.routes === "function") {
+    debugInfo.honoRoutes = honoApp.routes();
+  } else if (honoApp._handlers) {
+    debugInfo.honoRoutes = honoApp._handlers;
+  }
+
+  console.log("=== DEBUG ROUTE INFORMATION ===");
+  console.table(debugInfo);
+  console.log("=== END DEBUG INFO ===");
+}
+
+/**
+ * Internal helper to handle response parsing and type detection
+ * @internal
+ */
+async function handleResponse(
+  res: Response,
+): Promise<{ response: any; type: ResponseType }> {
+  try {
+    const clone = res.clone();
+    const json = await clone.json();
+    return { response: json, type: ResponseType.JSON };
+  } catch {
+    const text = await res.text();
+    return { response: text, type: ResponseType.TEXT };
   }
 }
 
-async function request(app: Yelix, path: string, config: Config): Promise<any> {
+/**
+ * Makes a request to the Yelix application and returns a typed response
+ * @param app The Yelix application instance
+ * @param path The endpoint path to request
+ * @param config Request configuration including method and other fetch options
+ * @returns Promise resolving to YelixResponse
+ *
+ * @example
+ * ```typescript
+ * // Simple GET request
+ * const response = await request(app, '/api/hello?name=world', {
+ *   method: 'GET'
+ * });
+ *
+ * // Assertions in tests
+ * expect(response.req.status).toBe(200);
+ * expect(response.res.responseType).toBe(ResponseType.TEXT);
+ * expect(response.res.text).toBe('Hello, world');
+ *
+ * // POST request with body
+ * const response = await request(app, '/api/users', {
+ *   method: 'POST',
+ *   body: JSON.stringify({ name: 'John' }),
+ *   headers: {
+ *     'Content-Type': 'application/json'
+ *   }
+ * });
+ * ```
+ *
+ * @throws {Error} When the Yelix app is not initialized
+ * @throws {Error} When no response is received from the server
+ */
+async function request(
+  app: Yelix,
+  path: string,
+  config: Config,
+): Promise<YelixResponse> {
   const hono = app.app;
   if (!hono) {
-    throw new Error("No app found");
+    throw new Error("Yelix application instance not initialized");
   }
 
   const res = await hono.request(path, config);
-
   if (!res) {
-    throw new Error("No response");
+    throw new Error(`No response received for ${config.method} ${path}`);
   }
 
-  let response;
-  try {
-    const clone = res.clone();
-    response = await clone.json();
-  } catch {
-    response = await res.text();
-  }
+  const { response, type } = await handleResponse(res);
 
-  console.log(
-    "REQUEST  ",
-    `${config?.method} ${path}`,
-    config?.body && typeof config.body === "string"
-      ? JSON.parse(config?.body)
-      : {},
-  );
-  console.log("RESPONSE ", response);
+  // Log request details
+  const requestBody = config?.body && typeof config.body === "string"
+    ? JSON.parse(config.body)
+    : {};
+
+  if (config?.logging !== false) {
+    console.log({
+      request: {
+        method: config?.method,
+        path,
+        body: requestBody,
+      },
+      response,
+    });
+  }
 
   return {
     req: res,
     res: {
-      responseType: typeof response === "string" ? "text" : "json",
-      text: response,
-      json: response,
+      responseType: type,
+      text: type === ResponseType.TEXT ? response : JSON.stringify(response),
+      json: type === ResponseType.JSON ? response : null,
     },
   };
 }
 
-export { request, YelixTestClient };
+export { debugRoutes, request, ResponseType, type YelixResponse };

@@ -8,19 +8,12 @@ import {
 import * as path from "jsr:@std/path@1.0.8";
 import type { OptionalAppConfigType } from "@/src/types/types.d.ts";
 
-type AppConfig = {
-  yelix?: OptionalAppConfigType;
-  app?: {
-    serve: boolean;
-  };
-};
-
-export async function main(config?: AppConfig) {
+export async function main(config?: OptionalAppConfigType) {
   const currentDir = Deno.cwd();
   const API_Folder = path.join(currentDir, "testing", "api");
 
   const app = new Yelix(
-    config?.yelix ? config.yelix : {
+    config ? config : {
       debug: false,
       port: 3030,
       watchDir: API_Folder,
@@ -65,9 +58,7 @@ export async function main(config?: AppConfig) {
 
   app.setMiddleware("dataValidation", requestDataValidationMiddleware);
 
-  if (config?.app?.serve) {
-    await app.serve();
-  }
+  await app.serve();
 
   return app;
 }

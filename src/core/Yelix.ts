@@ -31,6 +31,7 @@ const defaultConfig: AppConfigType = {
   dontIncludeDefaultMiddlewares: false,
   dontServeIndexPage: false,
   watchDir: undefined,
+  isTest: false,
 };
 
 type ActionMeta = {
@@ -60,7 +61,7 @@ class Yelix {
     this.serverManager = new ServerManager(this, this.logger);
     this.docsManager = new DocsManager(this.app);
 
-    if (!config.noWelcome) {
+    if (!config.noWelcome && !config.isTest) {
       sayWelcome();
     }
 
@@ -191,7 +192,12 @@ class Yelix {
     }
 
     serveEndpoints(this, this.docsManager, this.endpointList);
-    await this.serverManager.startServer(this.appConfig.port, this.app.fetch);
+
+    if (!this.appConfig.isTest) {
+      // Start server only if not in test mode
+      await this.serverManager.startServer(this.appConfig.port, this.app.fetch);
+    }
+
     this.isFirstServe = false;
   }
 

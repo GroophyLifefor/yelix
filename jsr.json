@@ -1,6 +1,6 @@
 {
   "name": "@murat/yelix",
-  "version": "0.1.26",
+  "version": "0.1.27",
   "license": "MIT",
   "exports": {
     ".": "./mod.ts",

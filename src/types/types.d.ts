@@ -59,6 +59,7 @@ type AppConfigType = {
   dontIncludeDefaultMiddlewares: boolean;
   dontServeIndexPage: boolean;
   watchDir: string | undefined;
+  isTest: boolean;
 };
 
 type OptionalAppConfigType = {
