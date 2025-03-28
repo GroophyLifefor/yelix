@@ -104,7 +104,7 @@ Deno.test("Number validation - chaining multiple validations", () => {
 
 Deno.test("Number validation - optional", () => {
   const validator = inp().number().optional();
-  
+
   assert(validator.validate(123), true);
   assert(validator.validate(0), true);
   assert(validator.validate(undefined), true);

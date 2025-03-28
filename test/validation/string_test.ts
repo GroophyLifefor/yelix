@@ -12,9 +12,9 @@ Deno.test("String validation - basic types", () => {
 
 Deno.test("String validation - trim", () => {
   const validator = inp().string().trim();
-  assert(validator.validate("  hello  "), "hello", 'value');
-  assert(validator.validate("\n\thello\n"), "hello", 'value');
-  assert(validator.validate("hello"), "hello", 'value');
+  assert(validator.validate("  hello  "), "hello", "value");
+  assert(validator.validate("\n\thello\n"), "hello", "value");
+  assert(validator.validate("hello"), "hello", "value");
 });
 
 Deno.test("String validation - length constraints", () => {
@@ -32,7 +32,7 @@ Deno.test("String validation - length constraints", () => {
 
 Deno.test("String validation - email", () => {
   const validator = inp().string().email();
-  
+
   assert(validator.validate("test@example.com"), true);
   assert(validator.validate("test.name@example.co.uk"), true);
   assert(validator.validate("invalid.email"), false);
@@ -43,7 +43,7 @@ Deno.test("String validation - email", () => {
 
 Deno.test("String validation - URL", () => {
   const validator = inp().string().url();
-  
+
   assert(validator.validate("https://example.com"), true);
   assert(validator.validate("http://localhost:3000"), true);
   assert(validator.validate("ftp://files.example.com"), true);
@@ -53,7 +53,7 @@ Deno.test("String validation - URL", () => {
 
 Deno.test("String validation - regex", () => {
   const validator = inp().string().regex(/^[A-Z][a-z]+$/);
-  
+
   assert(validator.validate("Hello"), true);
   assert(validator.validate("HELLO"), false);
   assert(validator.validate("hello"), false);
@@ -65,7 +65,7 @@ Deno.test("String validation - string content", () => {
     .includes("test")
     .startsWith("unit")
     .endsWith("now");
-    
+
   assert(validator.validate("unit-test-now"), true);
   assert(validator.validate("unit-testing-later"), false);
   assert(validator.validate("not-test-now"), false);
@@ -74,24 +74,24 @@ Deno.test("String validation - string content", () => {
 Deno.test("String validation - case transformations", () => {
   const lowerValidator = inp().string().toLowerCase();
   const upperValidator = inp().string().toUpperCase();
-  
-  assert(lowerValidator.validate("HELLO"), "hello", 'value');
-  assert(upperValidator.validate("hello"), "HELLO", 'value');
-  assert(lowerValidator.validate("MiXeD"), "mixed", 'value');
+
+  assert(lowerValidator.validate("HELLO"), "hello", "value");
+  assert(upperValidator.validate("hello"), "HELLO", "value");
+  assert(lowerValidator.validate("MiXeD"), "mixed", "value");
 });
 
 Deno.test("String validation - datetime formats", () => {
   const dateValidator = inp().string().date();
   const timeValidator = inp().string().time();
   const datetimeValidator = inp().string().datetime();
-  
+
   assert(dateValidator.validate("2023-12-31"), true);
   assert(dateValidator.validate("2023/12/31"), false);
-  
+
   assert(timeValidator.validate("23:59:59"), true);
   assert(timeValidator.validate("23:59:59.123"), true);
   assert(timeValidator.validate("24:00:00"), false);
-  
+
   assert(datetimeValidator.validate("2023-12-31T23:59:59Z"), true);
   assert(datetimeValidator.validate("2023-12-31T23:59:59+01:00"), true);
   assert(datetimeValidator.validate("2023-12-31 23:59:59"), false);
@@ -99,23 +99,26 @@ Deno.test("String validation - datetime formats", () => {
 
 Deno.test("String validation - IP addresses", () => {
   const validator = inp().string().ip();
-  
+
   // IPv4
   assert(validator.validate("192.168.1.1"), true);
   assert(validator.validate("255.255.255.255"), true);
   assert(validator.validate("256.1.2.3"), false);
   assert(validator.validate("1.2.3.256"), false);
-  
+
   // IPv6
   assert(validator.validate("2001:0db8:85a3:0000:0000:8a2e:0370:7334"), true);
   assert(validator.validate("fe80::1"), true);
   assert(validator.validate("::1"), true);
-  assert(validator.validate("2001:0db8:85a3:0000:0000:8a2e:0370:7334:extra"), false);
+  assert(
+    validator.validate("2001:0db8:85a3:0000:0000:8a2e:0370:7334:extra"),
+    false,
+  );
 });
 
 Deno.test("String validation - base64", () => {
   const validator = inp().string().base64();
-  
+
   assert(validator.validate("SGVsbG8gV29ybGQ="), true);
   assert(validator.validate("SGVsbG8="), true);
   assert(validator.validate("SGVsbG8"), true);
@@ -131,9 +134,9 @@ Deno.test("String validation - chaining multiple validations", () => {
     .max(10)
     .regex(/^[a-z]+$/)
     .toLowerCase();
-    
+
   assert(validator.validate("  HELLO  "), true);
-  assert(validator.validate("  HELLO  "), "hello", 'value');
+  assert(validator.validate("  HELLO  "), "hello", "value");
   assert(validator.validate("hi"), false);
   assert(validator.validate("hello world"), false);
   assert(validator.validate("Hello123"), false);
@@ -141,7 +144,7 @@ Deno.test("String validation - chaining multiple validations", () => {
 
 Deno.test("String validation - optional", () => {
   const validator = inp().string().optional();
-  
+
   assert(validator.validate("hello"), true);
   assert(validator.validate(""), true);
   assert(validator.validate(undefined), true);

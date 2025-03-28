@@ -15,7 +15,7 @@ Deno.test("Array validation - basic types and required", () => {
 
 Deno.test("Array validation - optional", () => {
   const validator = inp().array().optional();
-  
+
   assert(validator.validate([]), true);
   assert(validator.validate([1, 2, 3]), true);
   assert(validator.validate(undefined), true);
@@ -28,18 +28,18 @@ Deno.test("Array validation - length constraints", () => {
   const minValidator = inp().array().min(2);
   const maxValidator = inp().array().max(3);
   const exactValidator = inp().array().length(2);
-  
+
   // Min length tests
   assert(minValidator.validate([1, 2]), true);
   assert(minValidator.validate([1, 2, 3]), true);
   assert(minValidator.validate([1]), false);
   assert(minValidator.validate([]), false);
-  
+
   // Max length tests
   assert(maxValidator.validate([1]), true);
   assert(maxValidator.validate([1, 2, 3]), true);
   assert(maxValidator.validate([1, 2, 3, 4]), false);
-  
+
   // Exact length tests
   assert(exactValidator.validate([1, 2]), true);
   assert(exactValidator.validate([1]), false);
@@ -48,7 +48,7 @@ Deno.test("Array validation - length constraints", () => {
 
 Deno.test("Array validation - notEmpty", () => {
   const validator = inp().array().notEmpty();
-  
+
   assert(validator.validate([1]), true);
   assert(validator.validate(["test"]), true);
   assert(validator.validate([null]), true);
@@ -57,7 +57,7 @@ Deno.test("Array validation - notEmpty", () => {
 
 Deno.test("Array validation - unique", () => {
   const validator = inp().array().unique();
-  
+
   assert(validator.validate([1, 2, 3]), true);
   assert(validator.validate(["a", "b", "c"]), true);
   assert(validator.validate([1, 2, 2]), false);
@@ -70,11 +70,11 @@ Deno.test("Array validation - unique", () => {
 Deno.test("Array validation - includes", () => {
   const numberValidator = inp().array().includes(42);
   const stringValidator = inp().array().includes("test");
-  
+
   assert(numberValidator.validate([42]), true);
   assert(numberValidator.validate([1, 42, 3]), true);
   assert(numberValidator.validate([1, 2, 3]), false);
-  
+
   assert(stringValidator.validate(["test"]), true);
   assert(stringValidator.validate(["a", "test", "b"]), true);
   assert(stringValidator.validate(["a", "b", "c"]), false);
@@ -83,13 +83,13 @@ Deno.test("Array validation - includes", () => {
 Deno.test("Array validation - every", () => {
   const numberValidator = inp().array().every(inp().number().min(0));
   const stringValidator = inp().array().every(inp().string().min(2));
-  
+
   assert(numberValidator.validate([1, 2, 3]), true);
   assert(numberValidator.validate([]), true);
   assert(numberValidator.validate([0]), true);
   assert(numberValidator.validate([-1, 1, 2]), false);
   assert(numberValidator.validate([1, "2", 3]), false);
-  
+
   assert(stringValidator.validate(["test", "hello"]), true);
   assert(stringValidator.validate([]), true);
   assert(stringValidator.validate(["a"]), false);
@@ -99,12 +99,12 @@ Deno.test("Array validation - every", () => {
 Deno.test("Array validation - some", () => {
   const numberValidator = inp().array().some(inp().number().min(10));
   const stringValidator = inp().array().some(inp().string().email());
-  
+
   assert(numberValidator.validate([5, 15, 3]), true);
   assert(numberValidator.validate([15]), true);
   assert(numberValidator.validate([1, 2, 3]), false);
   assert(numberValidator.validate([]), false);
-  
+
   assert(stringValidator.validate(["test@example.com", "notanemail"]), true);
   assert(stringValidator.validate(["test@example.com"]), true);
   assert(stringValidator.validate(["test", "notanemail"]), false);
@@ -118,7 +118,7 @@ Deno.test("Array validation - complex chaining", () => {
     .max(4)
     .unique()
     .every(inp().number().range(0, 100));
-    
+
   assert(validator.validate([10, 20, 30]), true);
   assert(validator.validate([10, 20]), true);
   assert(validator.validate([10, 20, 30, 40]), true);
@@ -135,38 +135,52 @@ Deno.test("Array validation - nested validation", () => {
     inp().object({
       id: inp().number().min(1),
       name: inp().string().min(2),
-      tags: inp().array().every(inp().string())
-    })
+      tags: inp().array().every(inp().string()),
+    }),
   );
-  
-  assert(validator.validate([
-    { id: 1, name: "test", tags: ["a", "b"] },
-    { id: 2, name: "hello", tags: ["c"] }
-  ]), true);
-  
-  assert(validator.validate([
-    { id: 0, name: "test", tags: ["a"] }
-  ]), false);
-  
-  assert(validator.validate([
-    { id: 1, name: "t", tags: ["a"] }
-  ]), false);
-  
-  assert(validator.validate([
-    { id: 1, name: "test", tags: [1] }
-  ]), false);
+
+  assert(
+    validator.validate([
+      { id: 1, name: "test", tags: ["a", "b"] },
+      { id: 2, name: "hello", tags: ["c"] },
+    ]),
+    true,
+  );
+
+  assert(
+    validator.validate([
+      { id: 0, name: "test", tags: ["a"] },
+    ]),
+    false,
+  );
+
+  assert(
+    validator.validate([
+      { id: 1, name: "t", tags: ["a"] },
+    ]),
+    false,
+  );
+
+  assert(
+    validator.validate([
+      { id: 1, name: "test", tags: [1] },
+    ]),
+    false,
+  );
 });
 
 Deno.test("Array validation - custom rule", () => {
-  const validator = inp().array().customRule(
-    (value) => ({
-      isOk: Array.isArray(value) && 
-        value.every((n) => typeof n === "number" && n % 2 === 0)
-    }),
+  const validator = inp().array().addRule(
     "evenNumbers",
-    "All numbers must be even"
+    null,
+    // deno-lint-ignore no-explicit-any
+    (value: any) => ({
+      isOk: Array.isArray(value) &&
+        value.every((n) => typeof n === "number" && n % 2 === 0),
+    }),
+    "All numbers must be even",
   );
-  
+
   assert(validator.validate([2, 4, 6]), true);
   assert(validator.validate([]), true);
   assert(validator.validate([2]), true);

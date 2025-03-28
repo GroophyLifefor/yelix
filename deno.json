@@ -1,7 +1,7 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
@@ -24,7 +24,6 @@
     "@std/assert": "jsr:@std/assert@1",
     "hono": "npm:hono@^4.7.0",
     "hono-openapi": "npm:hono-openapi@^0.4.4",
-    "zod": "npm:zod@^3.24.1",
     "@/": "./"
   },
   "publish": {

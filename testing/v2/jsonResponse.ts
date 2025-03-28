@@ -1,31 +1,35 @@
 import { type Ctx, inp, type OpenAPIDoc, type ValidationType } from "@/mod.ts";
-import type { QueryType } from "@/src/types/types.d.ts";
 import { YelixCache } from "@/src/utils/cache.ts";
 
 export const cache = new YelixCache<string>();
 
 // API endpoint handler
-export async function GET(ctx: Ctx) {
+export async function POST(ctx: Ctx) {
   const requestData = ctx.get("dataValidation").user;
-  const query: QueryType = requestData.query;
+  const query = requestData.body;
 
   const data = "Hello, " + query.name;
-  return await ctx.text(data, 200);
+  return await ctx.json({
+    isOk: true,
+    message: data,
+    createdAt: new Date().toISOString(),
+  }, 200);
 }
 
 // API endpoint configs
-export const path = "/api/query";
+export const path = "/api/jsonResponse";
 export const middlewares = ["dataValidation"];
 
 // API endpoint data validation
 export const validation: ValidationType = {
-  query: {
+  body: inp().object({
     name: inp().string().min(3),
-    public: inp().object({
-      username: inp().string().min(3),
-      age: inp().number().min(18),
+    inner1: inp().object({
+      inner2: inp().object({
+        inner3: inp().string().min(3),
+      }),
     }),
-  },
+  }),
 };
 
 export const openAPI: OpenAPIDoc = {
@@ -33,7 +37,11 @@ export const openAPI: OpenAPIDoc = {
   responses: {
     200: {
       type: "application/json",
-      zodSchema: inp().string(),
+      zodSchema: inp().object({
+        isOk: inp().boolean(),
+        message: inp().string(),
+        createdAt: inp().string().datetime(),
+      }),
     },
   },
 };

@@ -1,4 +1,4 @@
-import { inp } from '@/mod.ts';
+import { inp } from "@/mod.ts";
 import { assert } from "@/test/validation/helper.ts";
 
 // Helper function to create real File objects
@@ -9,13 +9,13 @@ function createMockFile(options: {
 }) {
   const size = Math.min(options.size || 1024, 1024 * 1024); // Cap at 1MB for safety
   const content = new Uint8Array(Math.max(1, size)); // Ensure at least 1 byte
-  return new File([content], options.name || 'test.txt', {
-    type: options.type || 'text/plain',
+  return new File([content], options.name || "test.txt", {
+    type: options.type || "text/plain",
     lastModified: Date.now(),
   });
 }
 
-Deno.test('File validation - basic types and required', () => {
+Deno.test("File validation - basic types and required", () => {
   const validator = inp().file();
   const mockFile = createMockFile({});
 
@@ -24,18 +24,18 @@ Deno.test('File validation - basic types and required', () => {
   assert(validator.validate(undefined), false);
 });
 
-Deno.test('File validation - multiple files handling', () => {
+Deno.test("File validation - multiple files handling", () => {
   const validator = inp().file().multipleFiles();
   const mockFiles = [
-    createMockFile({ name: 'file1.txt' }),
-    createMockFile({ name: 'file2.txt' }),
+    createMockFile({ name: "file1.txt" }),
+    createMockFile({ name: "file2.txt" }),
   ];
 
   assert(validator.validate(mockFiles), true);
   assert(validator.validate([]), true);
 });
 
-Deno.test('File validation - minFilesCount', () => {
+Deno.test("File validation - minFilesCount", () => {
   const validator = inp().file().multipleFiles().minFilesCount(2);
   const oneFile = [createMockFile({})];
   const twoFiles = [createMockFile({}), createMockFile({})];
@@ -50,7 +50,7 @@ Deno.test('File validation - minFilesCount', () => {
   assert(validator.validate(threeFiles), true);
 });
 
-Deno.test('File validation - maxFilesCount', () => {
+Deno.test("File validation - maxFilesCount", () => {
   const validator = inp().file().multipleFiles().maxFilesCount(2);
   const oneFile = [createMockFile({})];
   const twoFiles = [createMockFile({}), createMockFile({})];
@@ -65,7 +65,7 @@ Deno.test('File validation - maxFilesCount', () => {
   assert(validator.validate(threeFiles), false);
 });
 
-Deno.test('File validation - file size constraints', () => {
+Deno.test("File validation - file size constraints", () => {
   const minValidator = inp().file().minSize(100);
   const maxValidator = inp().file().maxSize(200);
   const bothValidator = inp().file().minSize(100).maxSize(200);
@@ -90,14 +90,14 @@ Deno.test('File validation - file size constraints', () => {
   assert(bothValidator.validate(largeFile), false);
 });
 
-Deno.test('File validation - mime type validation', () => {
-  const singleMimeValidator = inp().file().mimeType('text/plain');
-  const multiMimeValidator = inp().file().mimeType(['image/jpeg', 'image/png']);
+Deno.test("File validation - mime type validation", () => {
+  const singleMimeValidator = inp().file().mimeType("text/plain");
+  const multiMimeValidator = inp().file().mimeType(["image/jpeg", "image/png"]);
 
-  const textFile = createMockFile({ type: 'text/plain' });
-  const jpegFile = createMockFile({ type: 'image/jpeg' });
-  const pngFile = createMockFile({ type: 'image/png' });
-  const pdfFile = createMockFile({ type: 'application/pdf' });
+  const textFile = createMockFile({ type: "text/plain" });
+  const jpegFile = createMockFile({ type: "image/jpeg" });
+  const pngFile = createMockFile({ type: "image/png" });
+  const pdfFile = createMockFile({ type: "application/pdf" });
 
   // Single mime type tests
   assert(singleMimeValidator.validate(textFile), true);
@@ -112,12 +112,12 @@ Deno.test('File validation - mime type validation', () => {
   const multiFileValidator = inp()
     .file()
     .multipleFiles()
-    .mimeType(['image/jpeg', 'image/png']);
+    .mimeType(["image/jpeg", "image/png"]);
   assert(multiFileValidator.validate([jpegFile, pngFile]), true);
   assert(multiFileValidator.validate([jpegFile, pdfFile]), false);
 });
 
-Deno.test('File validation - edge cases', () => {
+Deno.test("File validation - edge cases", () => {
   const validator = inp()
     .file()
     .multipleFiles()
@@ -132,7 +132,7 @@ Deno.test('File validation - edge cases', () => {
   assert(validator.validate([zeroSizeFile]), true);
 
   // Empty mime type
-  const emptyMimeFile = createMockFile({ type: '' });
+  const emptyMimeFile = createMockFile({ type: "" });
   assert(validator.validate([emptyMimeFile]), true);
 
   // Maximum possible file size
@@ -140,18 +140,18 @@ Deno.test('File validation - edge cases', () => {
   assert(validator.validate([maxSizeFile]), true);
 });
 
-Deno.test('File validation - chaining multiple validations', () => {
+Deno.test("File validation - chaining multiple validations", () => {
   const validator = inp()
     .file()
     .multipleFiles()
     .minFilesCount(1)
     .maxFilesCount(3)
     .maxSize(2000)
-    .mimeType(['image/jpeg', 'image/png']);
+    .mimeType(["image/jpeg", "image/png"]);
 
-  const validFile = createMockFile({ size: 1500, type: 'image/jpeg' });
-  const invalidSizeFile = createMockFile({ size: 2500, type: 'image/jpeg' });
-  const invalidTypeFile = createMockFile({ size: 1500, type: 'text/plain' });
+  const validFile = createMockFile({ size: 1500, type: "image/jpeg" });
+  const invalidSizeFile = createMockFile({ size: 2500, type: "image/jpeg" });
+  const invalidTypeFile = createMockFile({ size: 1500, type: "text/plain" });
 
   assert(validator.validate([validFile]), true);
   assert(validator.validate([validFile, validFile]), true);
@@ -159,27 +159,27 @@ Deno.test('File validation - chaining multiple validations', () => {
   assert(validator.validate([invalidTypeFile]), false);
   assert(
     validator.validate([validFile, validFile, validFile, validFile]),
-    false
+    false,
   );
 });
 
-Deno.test('File validation - non-file inputs', () => {
+Deno.test("File validation - non-file inputs", () => {
   const validator = inp().file();
 
-  assert(validator.validate('not a file'), false);
+  assert(validator.validate("not a file"), false);
   assert(validator.validate(123), false);
   assert(validator.validate({}), false);
-  assert(validator.validate({ name: 'test.txt', type: 'text/plain' }), false);
+  assert(validator.validate({ name: "test.txt", type: "text/plain" }), false);
   assert(validator.validate(true), false);
 });
 
-Deno.test('File validation - optional', () => {
+Deno.test("File validation - optional", () => {
   const validator = inp().file().optional();
   const mockFile = createMockFile({});
 
   assert(validator.validate(mockFile), true);
   assert(validator.validate(undefined), true);
   assert(validator.validate(null), true);
-  assert(validator.validate('not a file'), false);
+  assert(validator.validate("not a file"), false);
   assert(validator.validate(123), false);
 });

@@ -1,12 +1,21 @@
 import type { ValidateResult } from "@/mod.ts";
 import { assertEquals } from "@std/assert/equals";
 
-// deno-lint-ignore no-explicit-any
-function assert(value: ValidateResult, expect: any, field: 'isOk' | 'value' = 'isOk') {
+function assert(
+  value: ValidateResult,
+  // deno-lint-ignore no-explicit-any
+  expect: any,
+  field: "isOk" | "value" = "isOk",
+) {
   try {
     assertEquals(value[field], expect);
   } catch (e) {
-    console.log('info:', {
+    console.log("info:", {
+      rules: value.this.rules.map((r) => ({
+        title: r.title,
+        value: r.value,
+        errors: value.errors,
+      })),
       value: value.value,
       errors: value.errors,
       expect: expect,

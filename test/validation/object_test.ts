@@ -13,7 +13,7 @@ Deno.test("Object validation - basic types and required", () => {
 
 Deno.test("Object validation - optional", () => {
   const validator = inp().object().optional();
-  
+
   assert(validator.validate({}), true);
   assert(validator.validate({ test: "value" }), true);
   assert(validator.validate(undefined), true);
@@ -24,7 +24,7 @@ Deno.test("Object validation - optional", () => {
 
 Deno.test("Object validation - hasKey", () => {
   const validator = inp().object().hasKey("name");
-  
+
   assert(validator.validate({ name: "test" }), true);
   assert(validator.validate({ name: null }), true);
   assert(validator.validate({}), false);
@@ -34,11 +34,11 @@ Deno.test("Object validation - hasKey", () => {
 Deno.test("Object validation - minKeys/maxKeys", () => {
   const minValidator = inp().object().minKeys(2);
   const maxValidator = inp().object().maxKeys(2);
-  
+
   assert(minValidator.validate({ a: 1, b: 2 }), true);
   assert(minValidator.validate({ a: 1, b: 2, c: 3 }), true);
   assert(minValidator.validate({ a: 1 }), false);
-  
+
   assert(maxValidator.validate({ a: 1 }), true);
   assert(maxValidator.validate({ a: 1, b: 2 }), true);
   assert(maxValidator.validate({ a: 1, b: 2, c: 3 }), false);
@@ -46,7 +46,7 @@ Deno.test("Object validation - minKeys/maxKeys", () => {
 
 Deno.test("Object validation - exactKeys", () => {
   const validator = inp().object().exactKeys(["name", "age"]);
-  
+
   assert(validator.validate({ name: "test", age: 25 }), true);
   assert(validator.validate({ name: "test" }), false);
   assert(validator.validate({ name: "test", age: 25, extra: true }), false);
@@ -59,34 +59,43 @@ Deno.test("Object validation - nested validation", () => {
     age: inp().number().range(0, 120),
     address: inp().object({
       city: inp().string(),
-      zip: inp().string()
-    })
+      zip: inp().string(),
+    }),
   });
 
-  assert(validator.validate({
-    name: "John",
-    age: 30,
-    address: {
-      city: "New York",
-      zip: "10001"
-    }
-  }), true);
+  assert(
+    validator.validate({
+      name: "John",
+      age: 30,
+      address: {
+        city: "New York",
+        zip: "10001",
+      },
+    }),
+    true,
+  );
 
-  assert(validator.validate({
-    name: "J",
-    age: 30,
-    address: {
-      city: "New York",
-      zip: "10001"
-    }
-  }), false);
+  assert(
+    validator.validate({
+      name: "J",
+      age: 30,
+      address: {
+        city: "New York",
+        zip: "10001",
+      },
+    }),
+    false,
+  );
 
-  assert(validator.validate({
-    name: "John",
-    age: 150,
-    address: {
-      city: "New York",
-      zip: "10001"
-    }
-  }), false);
+  assert(
+    validator.validate({
+      name: "John",
+      age: 150,
+      address: {
+        city: "New York",
+        zip: "10001",
+      },
+    }),
+    false,
+  );
 });

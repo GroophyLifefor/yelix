@@ -38,6 +38,7 @@ class DateZod extends YelixValidationBase {
   required(failedMessage?: FailedMessage): this {
     this.addRule(
       "required",
+      null,
       (value: any) => ({
         isOk: value !== undefined && value !== null,
       }),
@@ -49,14 +50,15 @@ class DateZod extends YelixValidationBase {
   isValidType(failedMessage?: FailedMessage): this {
     this.addRule(
       "isValidType",
+      "date",
       (value: any) => {
         if (value === null || value === undefined) return { isOk: true };
         if (value instanceof Date) return { isOk: !isNaN(value.getTime()) };
         if (typeof value === "string") {
           const date = new Date(value);
-          return { 
+          return {
             isOk: !isNaN(date.getTime()),
-            newValue: date
+            newValue: date,
           };
         }
         return { isOk: false };
@@ -74,6 +76,7 @@ class DateZod extends YelixValidationBase {
   isDate(failedMessage?: FailedMessage): this {
     this.addRule(
       "isDate",
+      null,
       (value: any) => ({
         isOk: value instanceof Date || !isNaN(Date.parse(value)),
         newValue: value instanceof Date ? value : new Date(value),
@@ -87,7 +90,8 @@ class DateZod extends YelixValidationBase {
     const min = minDate instanceof Date ? minDate : new Date(minDate);
     this.addRule(
       "min",
-      (value: any) => ({
+      min,
+      (value: any, min: Date) => ({
         isOk: value instanceof Date && value >= min,
       }),
       failedMessage
@@ -101,7 +105,8 @@ class DateZod extends YelixValidationBase {
     const max = maxDate instanceof Date ? maxDate : new Date(maxDate);
     this.addRule(
       "max",
-      (value: any) => ({
+      max,
+      (value: any, max: Date) => ({
         isOk: value instanceof Date && value <= max,
       }),
       failedMessage
@@ -115,26 +120,27 @@ class DateZod extends YelixValidationBase {
     const dateFormat = typeof format === "string" ? { format } : format;
     this.addRule(
       "format",
-      (value: any) => {
+      dateFormat,
+      (value: any, dateFormat: DateFormat) => {
         try {
           const date = value instanceof Date ? value : new Date(value);
           if (isNaN(date.getTime())) return { isOk: false };
-          
+
           // Custom date formatting
           const year = date.getFullYear();
-          const month = String(date.getMonth() + 1).padStart(2, '0');
-          const day = String(date.getDate()).padStart(2, '0');
-          const hours = String(date.getHours()).padStart(2, '0');
-          const minutes = String(date.getMinutes()).padStart(2, '0');
-          const seconds = String(date.getSeconds()).padStart(2, '0');
+          const month = String(date.getMonth() + 1).padStart(2, "0");
+          const day = String(date.getDate()).padStart(2, "0");
+          const hours = String(date.getHours()).padStart(2, "0");
+          const minutes = String(date.getMinutes()).padStart(2, "0");
+          const seconds = String(date.getSeconds()).padStart(2, "0");
 
           const formatted = dateFormat.format
-            .replace('yyyy', year.toString())
-            .replace('MM', month)
-            .replace('dd', day)
-            .replace('HH', hours)
-            .replace('mm', minutes)
-            .replace('ss', seconds);
+            .replace("yyyy", year.toString())
+            .replace("MM", month)
+            .replace("dd", day)
+            .replace("HH", hours)
+            .replace("mm", minutes)
+            .replace("ss", seconds);
 
           return {
             isOk: true,
@@ -154,7 +160,8 @@ class DateZod extends YelixValidationBase {
   timezone(timezone: string, failedMessage?: FailedMessage): this {
     this.addRule(
       "timezone",
-      (value: any) => {
+      timezone,
+      (value: any, timezone: string) => {
         try {
           const date = new Date(value);
           return {
@@ -175,6 +182,7 @@ class DateZod extends YelixValidationBase {
   future(failedMessage?: FailedMessage): this {
     this.addRule(
       "future",
+      null,
       (value: any) => ({
         isOk: value instanceof Date && value > new Date(),
       }),
@@ -186,6 +194,7 @@ class DateZod extends YelixValidationBase {
   past(failedMessage?: FailedMessage): this {
     this.addRule(
       "past",
+      null,
       (value: any) => ({
         isOk: value instanceof Date && value < new Date(),
       }),
@@ -197,7 +206,8 @@ class DateZod extends YelixValidationBase {
   weekday(days: number[], failedMessage?: FailedMessage): this {
     this.addRule(
       "weekday",
-      (value: any) => ({
+      days,
+      (value: any, days: number[]) => ({
         isOk: value instanceof Date && days.includes(value.getDay()),
       }),
       failedMessage
@@ -210,7 +220,8 @@ class DateZod extends YelixValidationBase {
   age(minAge: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "age",
-      (value: any) => {
+      minAge,
+      (value: any, minAge: number) => {
         if (!(value instanceof Date)) return { isOk: false };
         const today = new Date();
         const birthDate = new Date(value);

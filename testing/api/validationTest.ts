@@ -1,4 +1,4 @@
-import { inp, type Ctx, type ValidationType } from "@/mod.ts";
+import { type Ctx, inp, type ValidationType } from "@/mod.ts";
 import type { QueryType } from "@/src/types/types.d.ts";
 import { YelixCache } from "@/src/utils/cache.ts";
 
@@ -37,6 +37,8 @@ export const validation: ValidationType = {
     age: inp().number().min(18).max(99),
     friendNames: inp().array().every(inp().string()),
     photos: inp().file().maxSize(5 * 1024 * 1024).maxFilesCount(5),
-    createdAt: inp().date().min(new Date("2021-01-01")).max(new Date("2021-12-31")),
-  }
+    createdAt: inp().date().min(new Date("2021-01-01")).max(
+      new Date("2021-12-31"),
+    ),
+  },
 };

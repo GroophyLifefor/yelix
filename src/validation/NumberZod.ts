@@ -19,6 +19,7 @@ class NumberZod extends YelixValidationBase {
   required(failedMessage?: FailedMessage): this {
     this.addRule(
       "required",
+      null,
       (value: any) => {
         return {
           isOk: value !== undefined && value !== null,
@@ -32,8 +33,11 @@ class NumberZod extends YelixValidationBase {
   isValidType(failedMessage?: FailedMessage): this {
     this.addRule(
       "isValidType",
+      "number",
       (value: any) => ({
-        isOk: value === null || value === undefined ? true : typeof value === "number"
+        isOk: value === null || value === undefined
+          ? true
+          : typeof value === "number",
       }),
       failedMessage ? failedMessage : "Value must be a number",
     );
@@ -48,7 +52,8 @@ class NumberZod extends YelixValidationBase {
   min(minValue: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "min",
-      (value: any) => ({
+      minValue,
+      (value: any, minValue: number) => ({
         isOk: typeof value === "number" && value >= minValue,
       }),
       failedMessage
@@ -61,7 +66,8 @@ class NumberZod extends YelixValidationBase {
   max(maxValue: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "max",
-      (value: any) => ({
+      maxValue,
+      (value: any, maxValue: number) => ({
         isOk: typeof value === "number" && value <= maxValue,
       }),
       failedMessage
@@ -74,6 +80,7 @@ class NumberZod extends YelixValidationBase {
   integer(failedMessage?: FailedMessage): this {
     this.addRule(
       "integer",
+      null,
       (value: any) => ({
         isOk: typeof value === "number" && Number.isInteger(value),
       }),
@@ -85,6 +92,7 @@ class NumberZod extends YelixValidationBase {
   positive(failedMessage?: FailedMessage): this {
     this.addRule(
       "positive",
+      null,
       (value: any) => ({
         isOk: typeof value === "number" && value > 0,
       }),
@@ -96,6 +104,7 @@ class NumberZod extends YelixValidationBase {
   negative(failedMessage?: FailedMessage): this {
     this.addRule(
       "negative",
+      null,
       (value: any) => ({
         isOk: typeof value === "number" && value < 0,
       }),
@@ -107,7 +116,8 @@ class NumberZod extends YelixValidationBase {
   range(min: number, max: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "range",
-      (value: any) => ({
+      [min, max],
+      (value: any, [min, max]: number[]) => ({
         isOk: typeof value === "number" && value >= min && value <= max,
       }),
       failedMessage
@@ -120,7 +130,8 @@ class NumberZod extends YelixValidationBase {
   multipleOf(base: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "multipleOf",
-      (value: any) => ({
+      base,
+      (value: any, base: number) => ({
         isOk: typeof value === "number" && value % base === 0,
       }),
       failedMessage ? failedMessage : `Number must be a multiple of ${base}`,
@@ -131,6 +142,7 @@ class NumberZod extends YelixValidationBase {
   finite(failedMessage?: FailedMessage): this {
     this.addRule(
       "finite",
+      null,
       (value: any) => ({
         isOk: typeof value === "number" && Number.isFinite(value),
       }),
@@ -142,6 +154,7 @@ class NumberZod extends YelixValidationBase {
   safe(failedMessage?: FailedMessage): this {
     this.addRule(
       "safe",
+      null,
       (value: any) => ({
         isOk: typeof value === "number" && Number.isSafeInteger(value),
       }),

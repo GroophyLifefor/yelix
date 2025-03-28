@@ -1,4 +1,4 @@
-import { inp, type Ctx, type ValidationType } from "@/mod.ts";
+import { type Ctx, inp, type ValidationType } from "@/mod.ts";
 import { YelixCache } from "@/src/utils/cache.ts";
 
 export const cache = new YelixCache<string>();
@@ -13,9 +13,9 @@ export async function POST(ctx: Ctx) {
     age: formData.age,
     email: formData.email,
     filesUploaded: formData.photos ? formData.photos.length : 0,
-    submittedAt: formData.createdAt
+    submittedAt: formData.createdAt,
   };
-  
+
   return await ctx.json(response, 200);
 }
 
@@ -30,6 +30,8 @@ export const validation: ValidationType = {
     email: inp().string().email(),
     age: inp().number().min(18).max(99),
     photos: inp().file().maxSize(5 * 1024 * 1024).maxFilesCount(3),
-    createdAt: inp().date().min(new Date("2023-01-01")).max(new Date("2024-12-31"))
-  }
+    createdAt: inp().date().min(new Date("2023-01-01")).max(
+      new Date("2024-12-31"),
+    ),
+  },
 };

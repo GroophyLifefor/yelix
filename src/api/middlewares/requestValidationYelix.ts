@@ -1,21 +1,21 @@
 // deno-lint-ignore-file no-explicit-any
 import type {
   Middleware,
-  YelixValidationBase,
   ValidationError,
   ValidationType,
-} from '@/mod.ts';
+  YelixValidationBase,
+} from "@/mod.ts";
 
 const requestDataValidationYelixMiddleware: Middleware = async (request) => {
   const validation: ValidationType = request.endpoint?.exports?.validation;
 
   if (!validation) {
     throw new Error(
-      'Validation schema is not defined for this endpoint. Please define a validation schema in the endpoint file.' +
-        request.endpoint?.path ||
-        '' + '.' ||
-        '' + request.endpoint?.methods ||
-        '' + '.'
+      "Validation schema is not defined for this endpoint. Please define a validation schema in the endpoint file." +
+          request.endpoint?.path ||
+        "" + "." ||
+        "" + request.endpoint?.methods ||
+        "" + ".",
     );
   }
 
@@ -36,9 +36,9 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
           errors.push(
             ...parsed.errors.map((error: ValidationError) => ({
               message: error.message,
-              from: 'query',
+              from: "query",
               key: error.key,
-            }))
+            })),
           );
         }
       }
@@ -51,17 +51,16 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
     try {
       bodyData = await request.ctx.req.json();
     } catch (_) {
-      const HTTPMethod = request.ctx.req.method || 'GET';
-      const isBodyNotAllowed = ['GET', 'DELETE', 'OPTIONS', 'HEAD'].includes(
-        HTTPMethod
+      const HTTPMethod = request.ctx.req.method || "GET";
+      const isBodyNotAllowed = ["GET", "DELETE", "OPTIONS", "HEAD"].includes(
+        HTTPMethod,
       );
 
       errors.push({
-        message:
-          'Invalid body, expected JSON.' +
+        message: "Invalid body, expected JSON." +
           (isBodyNotAllowed
             ? ` Body is not allowed for '${HTTPMethod}' method.`
-            : ''),
+            : ""),
       });
     }
 
@@ -76,8 +75,8 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
           let message = error.message;
           // deno-lint-ignore no-inner-declarations
           function lookNewKey(msg: any) {
-            if (typeof msg === 'object') {
-              key += (key?.length === 0 ? '' : '.') + msg.key;
+            if (typeof msg === "object") {
+              key += (key?.length === 0 ? "" : ".") + msg.key;
               message = msg.message;
               lookNewKey(msg.message);
             }
@@ -87,7 +86,7 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
           nerrors.push({
             message: message,
             key: key,
-            from: 'body',
+            from: "body",
           });
         }
 
@@ -104,7 +103,7 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
       formDatas = await request.ctx.req.formData();
     } catch (_) {
       errors.push({
-        message: 'Invalid form data, expected form data.',
+        message: "Invalid form data, expected form data.",
       });
     }
   }
@@ -112,19 +111,18 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
   if (formDataModal && formDatas) {
     for (const key in formDataModal) {
       const validator = formDataModal[key];
-      const data =
-        validator.getType === 'get'
-          ? formDatas.get(key)
-          : formDatas.getAll(key);
+      const data = validator.getType === "get"
+        ? formDatas.get(key)
+        : formDatas.getAll(key);
       const parsed = validator.validate(data, { key });
 
       if (!parsed.isOk) {
         errors.push(
           ...parsed.errors.map((error: ValidationError) => ({
             message: error.message,
-            from: 'formData',
+            from: "formData",
             key: error.key,
-          }))
+          })),
         );
       }
 
@@ -133,14 +131,13 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
   }
 
   return {
-    base:
-      errors.length > 0
-        ? {
-            responseStatus: 'end',
-            status: 400,
-            body: JSON.stringify({ errors }),
-          }
-        : {},
+    base: errors.length > 0
+      ? {
+        responseStatus: "end",
+        status: 400,
+        body: JSON.stringify({ errors }),
+      }
+      : {},
     user: {
       query,
       body,
