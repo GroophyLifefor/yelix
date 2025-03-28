@@ -1,20 +1,30 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Context } from "hono";
-import type z from "zod";
-import type { H } from "hono/types";
-import type { Yelix, YelixValidationBase } from "@/mod.ts";
-import type { OpenAPIYelixDoc } from "@/src/OpenAPI/index.ts";
-import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
+import type { Context } from 'hono';
+import type z from 'zod';
+import type { H } from 'hono/types';
+import type { ObjectZod, Yelix, YelixValidationBase } from '@/mod.ts';
+import type { OpenAPIYelixDoc } from '@/src/OpenAPI/index.ts';
+import type { ApiReferenceOptions } from 'npm:@scalar/hono-api-reference@0.5.172';
 
 type Ctx = Context;
 
-type ValidationType = {
+type ValidationTypeOld = {
   query?:
     | {
-      [key: string]: z.ZodType<any, any, any> | string | undefined;
-    }
+        [key: string]: z.ZodType<any, any, any> | string | undefined;
+      }
     | undefined;
   body?: z.infer<any> | undefined;
+  formData?: {
+    [key: string]: YelixValidationBase;
+  };
+};
+
+type ValidationType = {
+  query?: {
+    [key: string]: YelixValidationBase;
+  };
+  body?: ObjectZod;
   formData?: {
     [key: string]: YelixValidationBase;
   };
@@ -69,7 +79,7 @@ type OptionalAppConfigType = {
 type Middleware = (
   request: ApplyMiddlewareParams,
   next: () => Promise<void>,
-  yelix: Yelix,
+  yelix: Yelix
 ) =>
   | Promise<Record<string, unknown>>
   | Record<string, unknown>
@@ -125,4 +135,5 @@ export type {
   ParsedMethod,
   QueryType,
   ValidationType,
+  ValidationTypeOld
 };

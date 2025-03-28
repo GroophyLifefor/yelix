@@ -13,6 +13,7 @@
     "deploy": "deploy",
     "test": "deno test --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:testing": "deno test --allow-net --allow-read --allow-env ./testing",
+    "test:validation": "deno test --allow-net --allow-read --allow-env ./test/validation",
     "test:watch": "deno test --watch --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:coverage-html": "deno task test:coverage && deno coverage --html"
