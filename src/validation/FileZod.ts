@@ -119,15 +119,11 @@ class FileZod extends YelixValidationBase {
           ) {
             return {
               isOk: false,
-              errors: [{ message: "Invalid file object" }],
             };
           }
           if (file.size > size) {
             return {
               isOk: false,
-              errors: [{
-                message: `File size ${file.size} exceeds maximum size ${size}`,
-              }],
             };
           }
         }
