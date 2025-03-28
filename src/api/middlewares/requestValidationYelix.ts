@@ -10,11 +10,13 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
   const validation: ValidationType = request.endpoint?.exports?.validation;
 
   if (!validation) {
-    throw new Error(
-      `Validation schema is not defined for this endpoint. Please define a validation schema in the endpoint file.${
-        request.endpoint?.path ?? ""
-      }.${request.endpoint?.methods ?? ""}.`
-    );
+    let errorMessage = "Validation schema is not defined for this endpoint.";
+    if (request.endpoint) {
+      errorMessage +=
+        ` Please define a validation schema in the endpoint file.${request.endpoint.path}.${request.endpoint.methods}`;
+    }
+
+    throw new Error(errorMessage);
   }
 
   const errors: any = [];
