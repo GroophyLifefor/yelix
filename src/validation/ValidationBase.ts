@@ -13,7 +13,7 @@ type ValidateResult = {
   isOk: boolean;
   value: any;
   errors: ValidationError[];
-  this: YelixValidationBase;
+  validatorInstance: YelixValidationBase;
 };
 
 type ValidationRule = {
@@ -128,7 +128,7 @@ class YelixValidationBase {
       isOk: errors.length === 0,
       value: currentValue,
       errors: errors.map((err) => ({ message: err, key: pref })),
-      this: this,
+      validatorInstance: this,
     };
   }
 }

@@ -11,7 +11,7 @@ function assert(
     assertEquals(value[field], expect);
   } catch (e) {
     console.log("info:", {
-      rules: value.this.rules.map((r) => ({
+      rules: value.validatorInstance.rules.map((r) => ({
         title: r.title,
         value: r.value,
         errors: value.errors,
