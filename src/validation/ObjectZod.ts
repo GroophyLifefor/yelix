@@ -10,7 +10,7 @@ import {
 } from "@/mod.ts";
 
 class ObjectZod extends YelixValidationBase {
-  private input: YelixInput;
+  input: YelixInput;
   subFields: UnknownObject = {};
 
   constructor(_input: YelixInput, obj?: UnknownObject) {

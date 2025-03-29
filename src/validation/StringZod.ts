@@ -6,7 +6,7 @@ import {
 } from "@/src/validation/ValidationBase.ts";
 
 class StringZod extends YelixValidationBase {
-  private input: YelixInput;
+  input: YelixInput;
 
   constructor(_input: YelixInput) {
     super();
