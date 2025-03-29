@@ -11,31 +11,62 @@ class StringZod extends YelixValidationBase {
   constructor(_input: YelixInput) {
     super();
     this.input = _input;
+
+    this.required();
+    this.isValidType();
   }
 
   required(failedMessage?: FailedMessage): this {
     this.addRule(
       "required",
+      null,
       (value: any) => {
         return {
           isOk: value !== undefined && value !== null,
         };
       },
-      failedMessage ? failedMessage : "This field is required.",
+      failedMessage
+        ? failedMessage
+        : "This field must be a string and is required.",
     );
+    return this;
+  }
+
+  isValidType(failedMessage?: FailedMessage): this {
+    this.addRule(
+      "isValidType",
+      "string",
+      (value: any) => ({
+        isOk: value === null || value === undefined
+          ? true
+          : typeof value === "string",
+      }),
+      failedMessage ? failedMessage : "Value must be a string",
+    );
+    return this;
+  }
+
+  optional(): this {
+    this.removeRule("required");
     return this;
   }
 
   trim(failedMessage?: FailedMessage): this {
     this.addRule(
       "trim",
+      null,
       (value: any) => {
+        if (typeof value !== "string") {
+          return { isOk: false };
+        }
+        const trimmed = value.trim();
         return {
-          isOk: typeof value === "string",
-          newValue: value.trim(),
+          isOk: true,
+          newValue: trimmed,
         };
       },
       failedMessage ? failedMessage : "This field is not a string.",
+      true, // Mark this as a transformer that should run first
     );
     return this;
   }
@@ -43,7 +74,8 @@ class StringZod extends YelixValidationBase {
   max(maxLength: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "max",
-      (value: any) => ({
+      maxLength,
+      (value: any, maxLength: number) => ({
         isOk: typeof value === "string" && value.length <= maxLength,
       }),
       failedMessage
@@ -56,7 +88,8 @@ class StringZod extends YelixValidationBase {
   min(minLength: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "min",
-      (value: any) => ({
+      minLength,
+      (value: any, minLength: number) => ({
         isOk: typeof value === "string" && value.length >= minLength,
       }),
       failedMessage
@@ -69,7 +102,8 @@ class StringZod extends YelixValidationBase {
   length(exactLength: number, failedMessage?: FailedMessage): this {
     this.addRule(
       "length",
-      (value: any) => ({
+      exactLength,
+      (value: any, exactLength: number) => ({
         isOk: typeof value === "string" && value.length === exactLength,
       }),
       failedMessage
@@ -83,6 +117,7 @@ class StringZod extends YelixValidationBase {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     this.addRule(
       "email",
+      null,
       (value: any) => ({
         isOk: typeof value === "string" && emailRegex.test(value),
       }),
@@ -94,6 +129,7 @@ class StringZod extends YelixValidationBase {
   url(failedMessage?: FailedMessage): this {
     this.addRule(
       "url",
+      null,
       (value: any) => {
         try {
           new URL(value);
@@ -110,7 +146,8 @@ class StringZod extends YelixValidationBase {
   regex(pattern: RegExp, failedMessage?: FailedMessage): this {
     this.addRule(
       "regex",
-      (value: any) => ({
+      pattern,
+      (value: any, pattern: RegExp) => ({
         isOk: typeof value === "string" && pattern.test(value),
       }),
       failedMessage ? failedMessage : "String does not match pattern",
@@ -121,7 +158,8 @@ class StringZod extends YelixValidationBase {
   includes(searchString: string, failedMessage?: FailedMessage): this {
     this.addRule(
       "includes",
-      (value: any) => ({
+      searchString,
+      (value: any, searchString: string) => ({
         isOk: typeof value === "string" && value.includes(searchString),
       }),
       failedMessage ? failedMessage : `String must include "${searchString}"`,
@@ -132,7 +170,8 @@ class StringZod extends YelixValidationBase {
   startsWith(searchString: string, failedMessage?: FailedMessage): this {
     this.addRule(
       "startsWith",
-      (value: any) => ({
+      searchString,
+      (value: any, searchString: string) => ({
         isOk: typeof value === "string" && value.startsWith(searchString),
       }),
       failedMessage
@@ -145,7 +184,8 @@ class StringZod extends YelixValidationBase {
   endsWith(searchString: string, failedMessage?: FailedMessage): this {
     this.addRule(
       "endsWith",
-      (value: any) => ({
+      searchString,
+      (value: any, searchString: string) => ({
         isOk: typeof value === "string" && value.endsWith(searchString),
       }),
       failedMessage ? failedMessage : `String must end with "${searchString}"`,
@@ -158,6 +198,7 @@ class StringZod extends YelixValidationBase {
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[-+]\d{2}:?\d{2})?$/;
     this.addRule(
       "datetime",
+      null,
       (value: any) => ({
         isOk: typeof value === "string" && isoDatetimeRegex.test(value),
       }),
@@ -173,6 +214,7 @@ class StringZod extends YelixValidationBase {
       /^(?:(?:[a-fA-F0-9]{1,4}:){7}[a-fA-F0-9]{1,4}|(?:[a-fA-F0-9]{1,4}:){1,7}:|(?:[a-fA-F0-9]{1,4}:){1,6}:[a-fA-F0-9]{1,4}|(?:[a-fA-F0-9]{1,4}:){1,5}(?::[a-fA-F0-9]{1,4}){1,2}|(?:[a-fA-F0-9]{1,4}:){1,4}(?::[a-fA-F0-9]{1,4}){1,3}|(?:[a-fA-F0-9]{1,4}:){1,3}(?::[a-fA-F0-9]{1,4}){1,4}|(?:[a-fA-F0-9]{1,4}:){1,2}(?::[a-fA-F0-9]{1,4}){1,5}|[a-fA-F0-9]{1,4}:(?:(?::[a-fA-F0-9]{1,4}){1,6})|:(?:(?::[a-fA-F0-9]{1,4}){1,7}|:))$/;
     this.addRule(
       "ip",
+      null,
       (value: any) => ({
         isOk: typeof value === "string" &&
           (ipv4Regex.test(value) || ipv6Regex.test(value)),
@@ -185,11 +227,18 @@ class StringZod extends YelixValidationBase {
   toLowerCase(failedMessage?: FailedMessage): this {
     this.addRule(
       "toLowerCase",
-      (value: any) => ({
-        isOk: typeof value === "string",
-        newValue: value.toLowerCase(),
-      }),
+      null,
+      (value: any) => {
+        if (typeof value !== "string") {
+          return { isOk: false };
+        }
+        return {
+          isOk: true,
+          newValue: value.toLowerCase(),
+        };
+      },
       failedMessage ? failedMessage : "Value must be a string",
+      true, // Mark this as a transformer that should run first
     );
     return this;
   }
@@ -197,6 +246,7 @@ class StringZod extends YelixValidationBase {
   toUpperCase(failedMessage?: FailedMessage): this {
     this.addRule(
       "toUpperCase",
+      null,
       (value: any) => ({
         isOk: typeof value === "string",
         newValue: value.toUpperCase(),
@@ -210,6 +260,7 @@ class StringZod extends YelixValidationBase {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     this.addRule(
       "date",
+      null,
       (value: any) => ({
         isOk: typeof value === "string" && dateRegex.test(value),
       }),
@@ -222,6 +273,7 @@ class StringZod extends YelixValidationBase {
     const timeRegex = /^(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?$/;
     this.addRule(
       "time",
+      null,
       (value: any) => ({
         isOk: typeof value === "string" && timeRegex.test(value),
       }),
@@ -236,6 +288,7 @@ class StringZod extends YelixValidationBase {
     const base64Regex = /^[A-Za-z0-9+/]*={0,2}$/;
     this.addRule(
       "base64",
+      null,
       (value: any) => ({
         isOk: typeof value === "string" && base64Regex.test(value),
       }),

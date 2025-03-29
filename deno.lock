@@ -2019,8 +2019,7 @@
       "jsr:@std/fs@^1.0.13",
       "npm:@hono/zod-openapi@~0.18.4",
       "npm:hono-openapi@~0.4.4",
-      "npm:hono@^4.7.0",
-      "npm:zod@^3.24.1"
+      "npm:hono@^4.7.0"
     ]
   }
 }

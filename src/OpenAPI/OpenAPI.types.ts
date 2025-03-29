@@ -1,6 +1,5 @@
-import type { ValidationType } from "@/mod.ts";
+import type { ValidationType, YelixValidationBase } from "@/mod.ts";
 import type { AllowedLicenses } from "./index.ts";
-import type { z } from "zod";
 
 type OpenAPIMethods = "POST" | "GET" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 
@@ -704,7 +703,7 @@ type OpenAPIParams = {
 type AddOpenAPIEndpointResponseParams = {
   description?: string;
   type: string; // MIME type
-  zodSchema: z.ZodObject<z.ZodRawShape> | z.ZodString | null;
+  zodSchema: YelixValidationBase | null;
 };
 
 type NewEndpointParams = {

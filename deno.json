@@ -1,7 +1,7 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
@@ -13,6 +13,7 @@
     "deploy": "deploy",
     "test": "deno test --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:testing": "deno test --allow-net --allow-read --allow-env ./testing",
+    "test:validation": "deno test --allow-net --allow-read --allow-env ./test/validation",
     "test:watch": "deno test --watch --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:coverage": "deno test --coverage=coverage --allow-net --allow-read --allow-env --ignore=./testing/",
     "test:coverage-html": "deno task test:coverage && deno coverage --html"
@@ -23,7 +24,6 @@
     "@std/assert": "jsr:@std/assert@1",
     "hono": "npm:hono@^4.7.0",
     "hono-openapi": "npm:hono-openapi@^0.4.4",
-    "zod": "npm:zod@^3.24.1",
     "@/": "./"
   },
   "publish": {
