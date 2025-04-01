@@ -1,11 +1,12 @@
 import { FileZod } from "@/src/validation/FileZod.ts";
 import { StringZod } from "@/src/validation/StringZod.ts";
 import { ObjectZod } from "@/src/validation/ObjectZod.ts";
-import type { DateConfig, UnknownObject } from "@/mod.ts";
 import { NumberZod } from "@/src/validation/NumberZod.ts";
 import { ArrayZod } from "@/src/validation/ArrayZod.ts";
 import { DateZod } from "@/src/validation/DateZod.ts";
 import { BooleanZod } from "@/src/validation/BooleanZod.ts";
+import { AnyZod } from "@/src/validation/AnyZod.ts";
+import type { DateConfig, UnknownObject } from "@/mod.ts";
 
 export type InferStringInput = string;
 
@@ -39,6 +40,7 @@ class YelixInput {
     | ArrayZod
     | DateZod
     | BooleanZod
+    | AnyZod
     | undefined;
 
   file(): FileZod {
@@ -46,8 +48,9 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new FileZod(this);
-    return this._zod;
+    const zod = new FileZod(this) as FileZod;
+    this._zod = zod;
+    return zod;
   }
 
   string(): StringZod {
@@ -55,8 +58,9 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new StringZod(this);
-    return this._zod;
+    const zod = new StringZod(this);
+    this._zod = zod;
+    return zod;
   }
 
   object(_obj?: UnknownObject): ObjectZod {
@@ -64,8 +68,9 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new ObjectZod(this, _obj);
-    return this._zod;
+    const zod = new ObjectZod(this, _obj);
+    this._zod = zod;
+    return zod;
   }
 
   number(): NumberZod {
@@ -73,8 +78,9 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new NumberZod(this);
-    return this._zod;
+    const zod = new NumberZod(this);
+    this._zod = zod;
+    return zod;
   }
 
   array(): ArrayZod {
@@ -82,8 +88,9 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new ArrayZod(this);
-    return this._zod;
+    const zod = new ArrayZod(this);
+    this._zod = zod;
+    return zod;
   }
 
   date(config?: DateConfig): DateZod {
@@ -91,8 +98,9 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new DateZod(this, config);
-    return this._zod;
+    const zod = new DateZod(this, config);
+    this._zod = zod;
+    return zod;
   }
 
   boolean(): BooleanZod {
@@ -100,8 +108,19 @@ class YelixInput {
       throw new Error("Input type already set.");
     }
 
-    this._zod = new BooleanZod(this);
-    return this._zod;
+    const zod = new BooleanZod(this);
+    this._zod = zod;
+    return zod;
+  }
+
+  any(): AnyZod {
+    if (this._zod) {
+      throw new Error("Input type already set.");
+    }
+
+    const zod = new AnyZod(this);
+    this._zod = zod;
+    return zod;
   }
 }
 

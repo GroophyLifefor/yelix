@@ -112,3 +112,14 @@ Deno.test("Number validation - optional", () => {
   assert(validator.validate("123"), false);
   assert(validator.validate(""), false);
 });
+
+Deno.test("Number validation - enum", () => {
+  const validator = inp().number().enum([1, 2, 3, 5, 8, 13]);
+
+  assert(validator.validate(1), true);
+  assert(validator.validate(5), true);
+  assert(validator.validate(13), true);
+  assert(validator.validate(4), false);
+  assert(validator.validate(0), false);
+  assert(validator.validate(6), false);
+});

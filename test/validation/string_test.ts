@@ -152,3 +152,139 @@ Deno.test("String validation - optional", () => {
   assert(validator.validate(123), false);
   assert(validator.validate({}), false);
 });
+
+Deno.test("String validation - enum", () => {
+  const validator = inp().string().enum(["admin", "user", "guest"]);
+
+  assert(validator.validate("admin"), true);
+  assert(validator.validate("user"), true);
+  assert(validator.validate("guest"), true);
+  assert(validator.validate("other"), false);
+  assert(validator.validate(""), false);
+});
+
+Deno.test("String validation - toNumber", () => {
+  const validator = inp().string().toNumber().min(3).max(5);
+
+  assert(validator.validate("4"), true);
+  assert(validator.validate("3"), true);
+  assert(validator.validate("5"), true);
+  assert(validator.validate("2"), false);
+  assert(validator.validate("6"), false);
+  assert(validator.validate("abc"), false);
+  assert(validator.validate("4.5"), true); 
+  assert(validator.validate("4"), 4, "value");
+});
+
+Deno.test("String validation - toNumber with decimal", () => {
+  const validator = inp().string().toNumber();
+
+  assert(validator.validate("4.5"), true);
+  assert(validator.validate("-3.14"), true);
+  assert(validator.validate("123.456"), true);
+  assert(validator.validate("abc"), false);
+  assert(validator.validate("4.5.6"), false);
+  assert(validator.validate("4.5"), 4.5, "value");
+});
+
+Deno.test("String validation - toNumber edge cases", () => {
+  const validator = inp().string().toNumber();
+
+  // Basic number strings
+  assert(validator.validate("0"), true);
+  assert(validator.validate("-0"), false);
+  assert(validator.validate("+0"), false);
+  assert(validator.validate("42"), true);
+  assert(validator.validate("-42"), true);
+  assert(validator.validate("+42"), false);
+
+  // Decimal numbers
+  assert(validator.validate("3.14"), true);
+  assert(validator.validate("-3.14"), true);
+  assert(validator.validate("+3.14"), false);
+  assert(validator.validate(".14"), true);
+  assert(validator.validate("0.0"), true);
+  assert(validator.validate("0."), true);
+
+  // Scientific notation
+  assert(validator.validate("1e5"), false);
+  assert(validator.validate("1E5"), false);
+  assert(validator.validate("1.23e-4"), false);
+  assert(validator.validate("-1.23E+4"), false);
+
+  // Special numbers
+  assert(validator.validate("Infinity"), false);
+  assert(validator.validate("-Infinity"), false);
+  assert(validator.validate("NaN"), false); // NaN is technically a number but usually unwanted
+
+  // Invalid formats
+  assert(validator.validate("12.34.56"), false);
+  assert(validator.validate("1,234"), false);
+  assert(validator.validate("1_234"), false);
+  assert(validator.validate(" 123"), false);
+  assert(validator.validate("123 "), false);
+  assert(validator.validate("12 34"), false);
+  assert(validator.validate("0xFF"), false);
+  assert(validator.validate("123abc"), false);
+  assert(validator.validate("abc123"), false);
+  assert(validator.validate(""), false);
+  assert(validator.validate("e1"), false);
+  assert(validator.validate("."), false);
+
+  // Value transformations
+  assert(validator.validate("42"), 42, "value");
+  assert(validator.validate("-42.5"), -42.5, "value");
+  assert(validator.validate(".5"), 0.5, "value");
+});
+
+Deno.test("String validation - toNumber with constraints", () => {
+  const validator = inp().string()
+    .toNumber()
+    .min(-10)
+    .max(10)
+    .multipleOf(0.5);
+
+  // Valid numbers within constraints
+  assert(validator.validate("0"), true);
+  assert(validator.validate("10"), true);
+  assert(validator.validate("-10"), true);
+  assert(validator.validate("5.5"), true);
+  assert(validator.validate("-3.5"), true);
+  assert(validator.validate("0.5"), true);
+  
+  // Invalid numbers outside constraints
+  assert(validator.validate("10.1"), false);
+  assert(validator.validate("-10.1"), false);
+  assert(validator.validate("5.7"), false); // not multiple of 0.5
+  assert(validator.validate("1.23"), false); // not multiple of 0.5
+});
+
+Deno.test("String validation - toNumber with integer constraints", () => {
+  const validator = inp().string()
+    .toNumber()
+    .integer()
+    .positive();
+
+  // Valid integers
+  assert(validator.validate("42"), true);
+  assert(validator.validate("1"), true);
+  assert(validator.validate("9007199254740991"), true); // MAX_SAFE_INTEGER
+
+  // Invalid numbers
+  assert(validator.validate("3.14"), false);
+  assert(validator.validate("-42"), false);
+  assert(validator.validate("0"), false);
+  assert(validator.validate("1.0"), true); // Edge case: 1.0 is actually an integer
+  assert(validator.validate("9007199254740992"), true); // Beyond MAX_SAFE_INTEGER but still a valid number
+});
+
+Deno.test("String validation - toNumber whitespace handling", () => {
+  const validator = inp().string().toNumber();
+  
+  //  trims whitespace
+  assert(validator.validate(" 123"), false);
+  assert(validator.validate("123 "), false);
+  assert(validator.validate(" 123 "), false);
+  assert(validator.validate("\t123"), false);
+  assert(validator.validate("123\n"), false);
+});
