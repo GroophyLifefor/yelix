@@ -25,6 +25,12 @@ export const validation: ValidationType = {
       username: inp().string().min(3),
       age: inp().number().min(18),
     }),
+
+    country: inp().string().enum(["USA", "Canada", "Mexico"]),
+    limit: inp().number().enum([5, 10, 20, 50]),
+    date: inp()
+      .date()
+      .enum([new Date("2023-01-01"), new Date("2024-12-31")]),
   },
 };
 

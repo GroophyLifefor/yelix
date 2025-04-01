@@ -122,3 +122,18 @@ Deno.test("Date validation - chaining multiple validations", () => {
   assert(validator.validate(invalidWeekend), false);
   assert(validator.validate(invalidYear), false);
 });
+
+Deno.test("Date validation - enum", () => {
+  const dates = [
+    new Date("2024-01-01"),
+    new Date("2024-06-15"),
+    new Date("2024-12-31"),
+  ];
+  const validator = inp().date().enum(dates);
+
+  assert(validator.validate(new Date("2024-01-01")), true);
+  assert(validator.validate(new Date("2024-06-15")), true);
+  assert(validator.validate(new Date("2024-12-31")), true);
+  assert(validator.validate(new Date("2024-02-01")), false);
+  assert(validator.validate(new Date("2025-01-01")), false);
+});

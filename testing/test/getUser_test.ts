@@ -5,7 +5,9 @@ import { request, ResponseType } from "@/mod.ts";
 
 async function getServer() {
   return await main({
-    isTest: true,
+    yelix: {
+      isTest: true,
+    },
   });
 }
 

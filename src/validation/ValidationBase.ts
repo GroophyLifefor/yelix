@@ -49,7 +49,19 @@ class YelixValidationBase {
     rule: Rule,
     failedMessage?: FailedMessage,
     isTransformer?: boolean,
+    addToFirst: boolean = false,
   ): this {
+    if (addToFirst) {
+      this.rules.unshift({
+        title,
+        value,
+        rule,
+        failedMessage,
+        isTransformer,
+      });
+      return this;
+    }
+
     this.rules.push({
       title,
       value,

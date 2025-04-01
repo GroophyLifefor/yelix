@@ -242,6 +242,23 @@ class DateZod extends YelixValidationBase {
       weekday: "long",
     }).format(new Date(2024, 0, day + 1));
   }
+
+  enum(enums: Date[], failedMessage?: FailedMessage): this {
+    this.addRule(
+      "enum",
+      enums,
+      (value: any, enums: Date[]) => ({
+        isOk: value instanceof Date &&
+          enums.some((date) => date.getTime() === value.getTime()),
+      }),
+      failedMessage ? failedMessage : `Date must be one of: ${
+        enums
+          .map((date) => date.toLocaleDateString())
+          .join(", ")
+      }`,
+    );
+    return this;
+  }
 }
 
 export { DateZod };

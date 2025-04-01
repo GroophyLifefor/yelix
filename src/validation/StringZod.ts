@@ -4,6 +4,7 @@ import {
   type FailedMessage,
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
+import { inp, type NumberZod } from "@/mod.ts";
 
 class StringZod extends YelixValidationBase {
   input: YelixInput;
@@ -295,6 +296,55 @@ class StringZod extends YelixValidationBase {
       failedMessage ? failedMessage : "Invalid base64 string",
     );
     return this;
+  }
+
+  enum(enums: string[], failedMessage?: FailedMessage): this {
+    this.addRule(
+      "enum",
+      enums,
+      (value: any, enums: string[]) => ({
+        isOk: typeof value === "string" && enums.includes(value),
+      }),
+      failedMessage
+        ? failedMessage
+        : () => `Value must be one of: ${enums.join(", ")}`,
+    );
+    return this;
+  }
+
+  toNumber(failedMessage?: FailedMessage): NumberZod {
+    const numberZod = inp().number() as NumberZod;
+
+    numberZod.addRule(
+      "toNumber",
+      this,
+      (value: any, validator: StringZod) => {
+        if (typeof value !== "string") {
+          return { isOk: false };
+        }
+
+        const numRegex = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
+        if (!numRegex.test(value)) {
+          return { isOk: false };
+        }
+        const parsedValue = Number(value);
+
+        const validation = validator.validate(value);
+        if (!validation.isOk) {
+          return { isOk: false };
+        }
+
+        return {
+          isOk: true,
+          newValue: parsedValue,
+        };
+      },
+      failedMessage ? failedMessage : () => `Value must be a number`,
+      true,
+      true,
+    );
+
+    return numberZod;
   }
 }
 

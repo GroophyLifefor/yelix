@@ -162,6 +162,20 @@ class NumberZod extends YelixValidationBase {
     );
     return this;
   }
+
+  enum(enums: number[], failedMessage?: FailedMessage): this {
+    this.addRule(
+      "enum",
+      enums,
+      (value: any, enums: number[]) => ({
+        isOk: typeof value === "number" && enums.includes(value),
+      }),
+      failedMessage
+        ? failedMessage
+        : `Value must be one of: ${enums.join(", ")}`,
+    );
+    return this;
+  }
 }
 
 export { NumberZod };
