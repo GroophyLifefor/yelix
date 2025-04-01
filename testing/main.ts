@@ -1,7 +1,6 @@
 import {
   type Ctx,
   type Endpoint,
-  inp,
   type Middleware,
   requestDataValidationYelixMiddleware,
   Yelix,
