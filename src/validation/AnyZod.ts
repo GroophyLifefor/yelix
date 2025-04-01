@@ -29,18 +29,6 @@ class AnyZod extends YelixValidationBase {
     return this;
   }
 
-  isValidType(failedMessage?: FailedMessage): this {
-    this.addRule(
-      "isValidType",
-      "array",
-      (value: any) => ({
-        isOk: Array.isArray(value) || value === null || value === undefined,
-      }),
-      failedMessage ? failedMessage : "Value must be an array",
-    );
-    return this;
-  }
-
   optional(): this {
     this.removeRule("required");
     return this;
