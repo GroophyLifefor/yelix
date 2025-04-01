@@ -7,7 +7,7 @@ async function getServer() {
   return await main({
     yelix: {
       isTest: true,
-    }
+    },
   });
 }
 

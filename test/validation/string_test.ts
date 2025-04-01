@@ -172,7 +172,7 @@ Deno.test("String validation - toNumber", () => {
   assert(validator.validate("2"), false);
   assert(validator.validate("6"), false);
   assert(validator.validate("abc"), false);
-  assert(validator.validate("4.5"), true); 
+  assert(validator.validate("4.5"), true);
   assert(validator.validate("4"), 4, "value");
 });
 
@@ -251,7 +251,7 @@ Deno.test("String validation - toNumber with constraints", () => {
   assert(validator.validate("5.5"), true);
   assert(validator.validate("-3.5"), true);
   assert(validator.validate("0.5"), true);
-  
+
   // Invalid numbers outside constraints
   assert(validator.validate("10.1"), false);
   assert(validator.validate("-10.1"), false);
@@ -280,7 +280,7 @@ Deno.test("String validation - toNumber with integer constraints", () => {
 
 Deno.test("String validation - toNumber whitespace handling", () => {
   const validator = inp().string().toNumber();
-  
+
   //  trims whitespace
   assert(validator.validate(" 123"), false);
   assert(validator.validate("123 "), false);
