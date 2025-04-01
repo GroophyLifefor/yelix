@@ -33,8 +33,8 @@ type TestParams = {
 
 export function defaultBefore() {
   const app = new Yelix({
-    port: constants.testingPort,
-    noWelcome: true,
+    serverPort: constants.testingPort,
+    showWelcomeMessage: false,
   });
 
   app.serve();

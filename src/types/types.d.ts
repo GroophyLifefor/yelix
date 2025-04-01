@@ -50,13 +50,12 @@ type ParsedEndpoint = {
 };
 
 type AppConfigType = {
-  debug: boolean;
-  port: number;
-  noWelcome: boolean;
-  dontIncludeDefaultMiddlewares: boolean;
-  dontServeIndexPage: boolean;
-  watchDir: string | undefined;
-  isTest: boolean;
+  environment: "dev" | "debug" | "prod" | "test";
+  serverPort: number;
+  showWelcomeMessage: boolean;
+  includeDefaultMiddlewares: boolean;
+  serveIndexPage: boolean;
+  watchDirectory: string | undefined;
 };
 
 type OptionalAppConfigType = {

@@ -2,7 +2,7 @@
 import type { Yelix } from "@/mod.ts";
 
 function yelix_log(parent: Yelix, ...params: any): void {
-  if (parent.appConfig.debug) {
+  if (parent.appConfig.environment === "debug") {
     yelixClientLog(...params);
   }
 }

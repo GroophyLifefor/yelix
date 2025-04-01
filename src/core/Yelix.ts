@@ -25,13 +25,12 @@ import { DocsManager } from "./DocsManager.ts";
 import { debounce } from "@/src/utils/debounce.ts";
 
 const defaultConfig: AppConfigType = {
-  debug: false,
-  port: 3030,
-  noWelcome: false,
-  dontIncludeDefaultMiddlewares: false,
-  dontServeIndexPage: false,
-  watchDir: undefined,
-  isTest: false,
+  environment: "dev",
+  serverPort: 3030,
+  showWelcomeMessage: true,
+  includeDefaultMiddlewares: true,
+  serveIndexPage: true,
+  watchDirectory: undefined,
 };
 
 type ActionMeta = {
@@ -57,25 +56,25 @@ class Yelix {
     const config = { ...defaultConfig, ...appConfig };
     this.appConfig = config;
     this.app = new Hono();
-    this.logger = new Logger(this, config.debug);
+    this.logger = new Logger(this, config.environment === "debug");
     this.serverManager = new ServerManager(this, this.logger);
     this.docsManager = new DocsManager(this.app);
 
-    if (!config.noWelcome && !config.isTest) {
+    if (config.showWelcomeMessage == true && config.environment !== "test") {
       sayWelcome();
     }
 
-    if (!config.dontIncludeDefaultMiddlewares) {
+    if (config.includeDefaultMiddlewares) {
       this.setMiddleware("*", simpleLoggerMiddeware);
     }
 
-    if (!config.dontServeIndexPage) {
+    if (config.serveIndexPage) {
       serveIndexPage({ yelix: this, docsManager: this.docsManager });
     }
 
-    if (config.watchDir) {
+    if (config.watchDirectory) {
       this.watch();
-      const afterWatchDir = config.watchDir
+      const afterWatchDir = config.watchDirectory
         .replace(Deno.cwd(), ".")
         .replaceAll("\\", "/");
       this.serverManager.addServedInformation({
@@ -193,9 +192,12 @@ class Yelix {
 
     serveEndpoints(this, this.docsManager, this.endpointList);
 
-    if (!this.appConfig.isTest) {
+    if (this.appConfig.environment !== "test") {
       // Start server only if not in test mode
-      await this.serverManager.startServer(this.appConfig.port, this.app.fetch);
+      await this.serverManager.startServer(
+        this.appConfig.serverPort,
+        this.app.fetch,
+      );
     }
 
     this.isFirstServe = false;
@@ -206,8 +208,8 @@ class Yelix {
   }
 
   async watch() {
-    if (typeof this.appConfig.watchDir !== "string") {
-      this.throw("watchDir is not defined in appConfig");
+    if (typeof this.appConfig.watchDirectory !== "string") {
+      this.throw("watchDirectory is not defined in appConfig");
       return;
     }
 
@@ -223,7 +225,7 @@ class Yelix {
 
       for (const event of events) {
         const afterWatchDir = event.paths[0].replace(
-          this.appConfig.watchDir!,
+          this.appConfig.watchDirectory!, // non-null assertion operator
           "",
         );
         console.log("⊚ [%s] %s", event.kind, afterWatchDir);
@@ -231,7 +233,7 @@ class Yelix {
       this.restartEndpoints();
     }, 200);
 
-    const watcher = Deno.watchFs(this.appConfig.watchDir);
+    const watcher = Deno.watchFs(this.appConfig.watchDirectory);
 
     for await (const event of watcher) {
       log();
@@ -261,7 +263,7 @@ class Yelix {
       this.actionMetaList = [];
 
       // Step 4: Setup initial configuration
-      if (!this.appConfig.dontServeIndexPage) {
+      if (this.appConfig.serveIndexPage) {
         serveIndexPage({ yelix: this, docsManager: this.docsManager });
       }
 

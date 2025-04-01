@@ -21,9 +21,9 @@ export async function main(config?: AppConfig) {
 
   const app = new Yelix(
     config?.yelix ? config.yelix : {
-      debug: false,
-      port: 3030,
-      watchDir: API_Folder,
+      environment: "test",
+      serverPort: 3030,
+      watchDirectory: API_Folder,
     },
   );
 
