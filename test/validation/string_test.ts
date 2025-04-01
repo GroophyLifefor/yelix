@@ -192,7 +192,7 @@ Deno.test("String validation - toNumber edge cases", () => {
 
   // Basic number strings
   assert(validator.validate("0"), true);
-  assert(validator.validate("-0"), false);
+  assert(validator.validate("-0"), true);
   assert(validator.validate("+0"), false);
   assert(validator.validate("42"), true);
   assert(validator.validate("-42"), true);

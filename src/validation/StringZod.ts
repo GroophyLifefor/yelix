@@ -323,9 +323,8 @@ class StringZod extends YelixValidationBase {
           return { isOk: false };
         }
 
-        const numRegex = /^-?\d*\.?\d*$/;
-        const banneds = ["-0", "", "."];
-        if (!numRegex.test(value) || banneds.includes(value)) {
+        const numRegex = /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
+        if (!numRegex.test(value)) {
           return { isOk: false };
         }
         const parsedValue = Number(value);
