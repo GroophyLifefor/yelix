@@ -74,15 +74,5 @@ export async function main(config?: AppConfig) {
 }
 
 if (import.meta.main) {
-  const validator = inp().string().toNumber().min(3).max(5);
-
-  // some test
-  console.log(validator.validate("4").isOk); // true
-  console.log(validator.validate("3").isOk); // true
-  console.log(validator.validate("2").isOk); // false, min 3
-  console.log(validator.validate("6").isOk); // false, max 5
-  console.log(validator.validate("asdasd").isOk); // false, not a number
-  console.log(validator.validate("4").value); // 4
-
-  //await main();
+  await main();
 }
