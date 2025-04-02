@@ -32,69 +32,45 @@ deno add jsr:@murat/yelix
 
 - [Deno](https://deno.land/) installed on your system
 
-### Create a new project
+### Create a New Project
+
+Generate a new Yelix project with a single command:
 
 ```sh
-# Initialize a new Deno project
-deno init my-app
-
-# Change to project directory
-cd my-app
-
-# Install Yelix
-deno add jsr:@murat/yelix
+deno run --allow-write --allow-read https://yelix-docs.deno.dev/yelix-template.ts
 ```
 
-### Create your server
-
-Update your `main.ts` file with the following code:
-
-```typescript
-import { Yelix } from "jsr:@murat/yelix";
-import * as path from "jsr:@std/path@1.0.8";
-
-async function main() {
-  // Port is 3030 by default
-  const app = new Yelix();
-
-  // Load endpoints from an 'api' folder
-  const currentDir = Deno.cwd();
-  const API_Folder = path.join(currentDir, "api");
-  await app.loadEndpointsFromFolder(API_Folder);
-
-  app.serve();
-}
-
-await main();
+This will create a new project with the following structure:
+```
+api/
+└── hello.ts
+deno.json
+main.ts
 ```
 
-### Create an API endpoint
+### Example Endpoint
 
-Create a new folder named `api` in your project directory, then add a file
-`hello.ts` with:
+Here's how a basic endpoint looks in Yelix (`api/hello.ts`):
 
 ```typescript
 import type { Ctx } from "jsr:@murat/yelix";
 
-// API endpoint handler
 export async function GET(ctx: Ctx) {
   return await ctx.text("Hello World!", 200);
 }
 
-// API endpoint configs
 export const path = "/api/hello";
 ```
 
-### Run your server
+### Running Your Server
 
-Start the development server with:
+Start the development server:
 
 ```sh
-deno run --watch --allow-net --allow-read --allow-env main.ts
+deno task dev
 ```
 
-Command flags:
-
+Command flags (automatically included in deno.json):
 - `--watch`: Automatically reloads server when changes are made
 - `--allow-net`: Permits network access for serving
 - `--allow-read`: Allows file access for loading endpoints
