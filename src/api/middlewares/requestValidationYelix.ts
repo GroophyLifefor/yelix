@@ -1,10 +1,14 @@
 // deno-lint-ignore-file no-explicit-any
-import type {
-  Middleware,
-  ValidationError,
-  ValidationType,
-  YelixValidationBase,
-} from "@/mod.ts";
+import type { Middleware, ValidationError, ValidationType } from "@/mod.ts";
+
+// Move function to module scope
+function lookNewKey(key: string, msg: any): { key: string; message: string } {
+  if (typeof msg === "object" && msg !== null) {
+    const newKey = key + (key.length === 0 ? "" : ".") + (msg.key || "");
+    return lookNewKey(newKey, msg.message);
+  }
+  return { key, message: msg };
+}
 
 const requestDataValidationYelixMiddleware: Middleware = async (request) => {
   const validation: ValidationType = request.endpoint?.exports?.validation;
@@ -19,10 +23,22 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
     throw new Error(errorMessage);
   }
 
-  const errors: any = [];
+  const errors: { [key: string]: any[] } = {};
   const query: any = {};
   let body: any = {};
   const formData: any = {};
+
+  const addError = (error: ValidationError, from: string) => {
+    const key = error.key?.trim().replace(/^\[|\]$/g, "") || "unknown";
+    if (!errors[key]) {
+      errors[key] = [];
+    }
+    errors[key].push({
+      message: error.message,
+      key,
+      from,
+    });
+  };
 
   const queryModal = validation?.query;
   if (queryModal) {
@@ -33,12 +49,8 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
         const parsed = validator.validate(value, { key });
         query[key] = parsed.value;
         if (!parsed.isOk) {
-          errors.push(
-            ...parsed.errors.map((error: ValidationError) => ({
-              message: error.message,
-              from: "query",
-              key: error.key,
-            })),
+          parsed.errors.forEach((error: ValidationError) =>
+            addError(error, "query")
           );
         }
       }
@@ -56,11 +68,14 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
         HTTPMethod,
       );
 
-      errors.push({
+      if (!errors["_body"]) errors["_body"] = [];
+      errors["_body"].push({
         message: "Invalid body, expected JSON." +
           (isBodyNotAllowed
             ? ` Body is not allowed for '${HTTPMethod}' method.`
             : ""),
+        key: "_body",
+        from: "body",
       });
     }
 
@@ -68,42 +83,33 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
       const parsed = bodyModal.validate(bodyData);
       body = parsed.value;
       if (!parsed.isOk) {
-        const nerrors = [];
-
         for (const error of parsed.errors) {
-          let key = error.key;
-          let message = error.message;
-          // deno-lint-ignore no-inner-declarations
-          function lookNewKey(msg: any) {
-            if (typeof msg === "object") {
-              key += (key?.length === 0 ? "" : ".") + msg.key;
-              message = msg.message;
-              lookNewKey(msg.message);
-            }
-          }
-          lookNewKey(error.message);
+          // Handle potentially undefined key
+          const initialKey = error.key || "";
+          const { key, message } = lookNewKey(initialKey, error.message);
 
-          nerrors.push({
-            message: message,
-            key: key,
+          if (!errors[key]) errors[key] = [];
+          errors[key].push({
+            message,
+            key,
             from: "body",
           });
         }
-
-        errors.push(...nerrors);
       }
     }
   }
 
-  const formDataModal: { [key: string]: YelixValidationBase } | undefined =
-    validation?.formData;
+  const formDataModal = validation?.formData;
   let formDatas = undefined;
   if (formDataModal) {
     try {
       formDatas = await request.ctx.req.formData();
     } catch (_) {
-      errors.push({
+      if (!errors["_formData"]) errors["_formData"] = [];
+      errors["_formData"].push({
         message: "Invalid form data, expected form data.",
+        key: "_formData",
+        from: "formData",
       });
     }
   }
@@ -117,12 +123,8 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
       const parsed = validator.validate(data, { key });
 
       if (!parsed.isOk) {
-        errors.push(
-          ...parsed.errors.map((error: ValidationError) => ({
-            message: error.message,
-            from: "formData",
-            key: error.key,
-          })),
+        parsed.errors.forEach((error: ValidationError) =>
+          addError(error, "formData")
         );
       }
 
@@ -131,7 +133,7 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
   }
 
   return {
-    base: errors.length > 0
+    base: Object.keys(errors).length > 0
       ? {
         responseStatus: "end",
         status: 400,

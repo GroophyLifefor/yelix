@@ -21,7 +21,7 @@ export async function main(config?: AppConfig) {
 
   const app = new Yelix(
     config?.yelix ? config.yelix : {
-      environment: "test",
+      environment: "dev",
       serverPort: 3030,
       watchDirectory: API_Folder,
     },

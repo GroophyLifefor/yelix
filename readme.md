@@ -41,6 +41,7 @@ deno run --allow-write --allow-read https://yelix-docs.deno.dev/yelix-template.t
 ```
 
 This will create a new project with the following structure:
+
 ```
 api/
 └── hello.ts
@@ -71,6 +72,7 @@ deno task dev
 ```
 
 Command flags (automatically included in deno.json):
+
 - `--watch`: Automatically reloads server when changes are made
 - `--allow-net`: Permits network access for serving
 - `--allow-read`: Allows file access for loading endpoints
