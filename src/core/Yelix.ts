@@ -82,6 +82,11 @@ class Yelix {
         description: afterWatchDir,
       });
     }
+
+    this.serverManager.addServedInformation({
+      title: "Environment",
+      description: config.environment,
+    });
   }
 
   // Delegate logging methods to Logger

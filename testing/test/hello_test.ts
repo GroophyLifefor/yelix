@@ -5,12 +5,8 @@ import { request } from "@/mod.ts";
 
 async function getServer() {
   return await main({
-    yelix: {
-      showWelcomeMessage: false,
-    },
-    app: {
-      serve: true,
-    },
+    showWelcomeMessage: false,
+    environment: "test",
   });
 }
 
@@ -25,8 +21,6 @@ describe("Hello endpoint test", () => {
     expect(task.req.status).toBe(200);
     expect(task.res.responseType).toBe("text");
     expect(task.res.text).toBe("Hello, world");
-
-    await app.kill();
   });
 });
 
@@ -41,7 +35,5 @@ describe("Another Hello endpoint test", () => {
     expect(task.req.status).toBe(200);
     expect(task.res.responseType).toBe("text");
     expect(task.res.text).toBe("Hello, world");
-
-    await app.kill();
   });
 });
