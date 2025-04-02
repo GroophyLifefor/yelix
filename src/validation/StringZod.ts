@@ -8,6 +8,7 @@ import { inp, type NumberZod } from "@/mod.ts";
 
 class StringZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "string";
 
   constructor(_input: YelixInput) {
     super();

@@ -7,6 +7,7 @@ import {
 
 class BooleanZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "boolean";
 
   constructor(_input: YelixInput) {
     super();

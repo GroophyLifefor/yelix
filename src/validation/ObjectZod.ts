@@ -12,6 +12,7 @@ import {
 class ObjectZod extends YelixValidationBase {
   input: YelixInput;
   subFields: UnknownObject = {};
+  override type: string = "object";
 
   constructor(_input: YelixInput, obj?: UnknownObject) {
     super();

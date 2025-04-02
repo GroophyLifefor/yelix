@@ -7,6 +7,7 @@ import {
 
 class ArrayZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "array";
 
   constructor(_input: YelixInput) {
     super();

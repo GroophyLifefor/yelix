@@ -33,6 +33,7 @@ type ValidateConfig = {
 
 class YelixValidationBase {
   rules: ValidationRule[] = [];
+  type: string = "not_set";
   getType: "get" | "getAll" = "get";
 
   protected removeRule(title: string) {

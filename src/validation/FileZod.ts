@@ -7,6 +7,7 @@ import {
 
 class FileZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "file";
 
   constructor(_input: YelixInput) {
     super();

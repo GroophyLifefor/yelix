@@ -21,7 +21,24 @@ export const openAPI: OpenAPIDoc = {
   responses: {
     200: {
       type: "application/json",
-      zodSchema: inp().string(),
+      zodSchema: inp().object({
+        message: inp().string(),
+        data: inp().object({
+          registerType: inp().string(),
+          registerDate: inp().string(),
+          lastLoginDate: inp().string(),
+          email: inp().string(),
+          name: inp().string(),
+          username: inp().string(),
+          picture: inp().string().optional(),
+        }),
+      }),
+    },
+    404: {
+      type: "application/json",
+      zodSchema: inp().object({
+        message: inp().string(),
+      }),
     },
   },
 };

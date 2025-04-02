@@ -7,6 +7,7 @@ import {
 
 class AnyZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "any";
 
   constructor(_input: YelixInput) {
     super();

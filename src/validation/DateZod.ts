@@ -19,6 +19,7 @@ type DateConfig = {
 
 class DateZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "date";
   private config: DateConfig;
 
   constructor(_input: YelixInput, config?: DateConfig) {

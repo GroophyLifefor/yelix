@@ -7,6 +7,7 @@ import {
 
 class NumberZod extends YelixValidationBase {
   input: YelixInput;
+  override type: string = "number";
 
   constructor(_input: YelixInput) {
     super();

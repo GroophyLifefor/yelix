@@ -40,42 +40,57 @@ class YelixOpenAPI {
   }
 
   private generateYelixExample(yelixSchema: YelixValidationBase): any {
-    const typeRule = yelixSchema.rules.find((r) => r.title === "isValidType");
-    if (!typeRule) return null;
+    const type = yelixSchema.type;
+    if (type === "not-set") return "unknown";
 
-    const type = typeRule.value;
     const isDatetime = yelixSchema.rules.some((r) => r.title === "datetime");
+    const isOptional = yelixSchema.rules.some((r) => r.title === "optional");
 
-    if (type === "string") {
-      if (isDatetime) return new Date().toISOString();
-      return "example string";
-    }
-    if (type === "number") return 42;
-    if (type === "boolean") return true;
-    if (type === "file") return "example.txt";
+    if (isOptional) return undefined;
 
-    if (type === "object" && "subFields" in yelixSchema) {
-      const example: Record<string, any> = {};
-      for (
-        const [key, subSchema] of Object.entries(
-          yelixSchema.subFields as Record<string, YelixValidationBase>,
-        )
-      ) {
-        example[key] = this.generateYelixExample(subSchema);
+    switch (type) {
+      case "any":
+        return "any value";
+      case "string":
+        return isDatetime ? new Date().toISOString() : "example string";
+      case "number":
+        return 42;
+      case "boolean":
+        return true;
+      case "date":
+        return new Date().toISOString();
+      case "file":
+        return "example.txt";
+      case "object":
+        if ("subFields" in yelixSchema) {
+          const example: Record<string, any> = {};
+          const subFields = yelixSchema.subFields as Record<
+            string,
+            YelixValidationBase
+          >;
+          if (!subFields) return {};
+
+          for (const [key, subSchema] of Object.entries(subFields)) {
+            const value = this.generateYelixExample(subSchema);
+            if (value !== undefined) {
+              example[key] = value;
+            }
+          }
+          return example;
+        }
+        return {};
+      case "array": {
+        const arrayTypeRule = yelixSchema.rules.find(
+          (r) => r.title === "arrayType",
+        );
+        if (arrayTypeRule?.value) {
+          return [this.generateYelixExample(arrayTypeRule.value)];
+        }
+        return ["example"];
       }
-      return example;
+      default:
+        return "unknown";
     }
-
-    if (type === "array") {
-      const arrayTypeRule = yelixSchema.rules.find((r) =>
-        r.title === "arrayType"
-      );
-      if (arrayTypeRule && arrayTypeRule.value) {
-        return [this.generateYelixExample(arrayTypeRule.value)];
-      }
-      return ["example"];
-    }
-    return null;
   }
 
   private yelixZodToJsonSchema(
@@ -83,27 +98,29 @@ class YelixOpenAPI {
   ): OpenAPIDefaultSchema {
     const schema: OpenAPIDefaultSchema = { type: "string" };
 
-    for (const rule of yelixSchema.rules) {
-      if (rule.title === "isValidType") {
-        const type = rule.value;
-        if (type === "string") schema.type = "string";
-        else if (type === "number") schema.type = "number";
-        else if (type === "boolean") schema.type = "boolean";
-        else if (type === "date") schema.type = "string";
-        else if (type === "file") schema.type = "string";
-        else if (type === "array") schema.type = "array";
-        else if (type === "object") {
-          schema.type = "object";
-          if ("subFields" in yelixSchema) {
-            schema.properties = {};
-            for (
-              const [key, subSchema] of Object.entries(
-                yelixSchema.subFields as Record<string, YelixValidationBase>,
-              )
-            ) {
-              schema.properties[key] = this.yelixZodToJsonSchema(subSchema);
-            }
-          }
+    const type = yelixSchema.type;
+    if (type === "string") {
+      schema.type = "string";
+    } else if (type === "number") {
+      schema.type = "number";
+    } else if (type === "boolean") {
+      schema.type = "boolean";
+    } else if (type === "date") {
+      schema.type = "string";
+    } else if (type === "file") {
+      schema.type = "string";
+    } else if (type === "array") {
+      schema.type = "array";
+    } else if (type === "object") {
+      schema.type = "object";
+      if ("subFields" in yelixSchema) {
+        schema.properties = {};
+        for (
+          const [key, subSchema] of Object.entries(
+            yelixSchema.subFields as Record<string, YelixValidationBase>,
+          )
+        ) {
+          schema.properties[key] = this.yelixZodToJsonSchema(subSchema);
         }
       }
     }
