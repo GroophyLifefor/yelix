@@ -2,25 +2,18 @@ import {
   type Ctx,
   type Endpoint,
   type Middleware,
+  type OptionalAppConfigType,
   requestDataValidationYelixMiddleware,
   Yelix,
 } from "@/mod.ts";
 import * as path from "jsr:@std/path@1.0.8";
-import type { OptionalAppConfigType } from "@/src/types/types.d.ts";
 
-type AppConfig = {
-  yelix?: OptionalAppConfigType;
-  app?: {
-    serve: boolean;
-  };
-};
-
-export async function main(config?: AppConfig) {
+export async function main(yelix?: OptionalAppConfigType) {
   const currentDir = Deno.cwd();
-  const API_Folder = path.join(currentDir, "testing", "v2");
+  const API_Folder = path.join(currentDir, "testing", "api");
 
   const app = new Yelix(
-    config?.yelix ? config.yelix : {
+    yelix ? yelix : {
       environment: "dev",
       serverPort: 3030,
       watchDirectory: API_Folder,
@@ -65,9 +58,7 @@ export async function main(config?: AppConfig) {
 
   app.setMiddleware("dataValidation", requestDataValidationYelixMiddleware);
 
-  if (!(config?.app?.serve === false)) {
-    await app.serve();
-  }
+  await app.serve();
 
   return app;
 }

@@ -19,11 +19,7 @@ export const middlewares = ["dataValidation"];
 // API endpoint data validation
 export const validation: ValidationType = {
   body: inp().object({
-    name: inp().string().min(3),
-    inner1: inp().object({
-      inner2: inp().object({
-        inner3: inp().string().min(3),
-      }),
-    }),
-  }),
+    username: inp().string().min(3).max(255),
+    email: inp().string().email()
+  })
 };
