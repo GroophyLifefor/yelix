@@ -6,7 +6,7 @@ import { request } from "@/mod.ts";
 async function getServer() {
   return await main({
     showWelcomeMessage: false,
-    environment: 'test',
+    environment: "test",
   });
 }
 

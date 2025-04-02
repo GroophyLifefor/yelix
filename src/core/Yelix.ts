@@ -1,10 +1,10 @@
 // deno-lint-ignore-file no-explicit-any
-import { Hono } from 'hono';
+import { Hono } from "hono";
 import {
   loadEndpoints,
   loadEndpointsFromFolder,
-} from '@/src/api/endpoints/loadEndpoints.ts';
-import { serveEndpoints } from '@/src/api/endpoints/serveEndpoints.ts';
+} from "@/src/api/endpoints/loadEndpoints.ts";
+import { serveEndpoints } from "@/src/api/endpoints/serveEndpoints.ts";
 import type {
   AppConfigType,
   CORSParams,
@@ -14,18 +14,18 @@ import type {
   MiddlewareList,
   OptionalAppConfigType,
   ParsedEndpoint,
-} from '@/src/types/types.d.ts';
-import { sayWelcome } from '@/src/utils/welcome.ts';
-import { simpleLoggerMiddeware } from '@/src/api/middlewares/simpleLogger.ts';
-import { serveIndexPage } from '@/src/api/indexPage/getHtml.ts';
-import { cors } from 'hono/cors';
-import { Logger } from './Logger.ts';
-import { ServerManager } from './ServerManager.ts';
-import { DocsManager } from './DocsManager.ts';
-import { debounce } from '@/src/utils/debounce.ts';
+} from "@/src/types/types.d.ts";
+import { sayWelcome } from "@/src/utils/welcome.ts";
+import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
+import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
+import { cors } from "hono/cors";
+import { Logger } from "./Logger.ts";
+import { ServerManager } from "./ServerManager.ts";
+import { DocsManager } from "./DocsManager.ts";
+import { debounce } from "@/src/utils/debounce.ts";
 
 const defaultConfig: AppConfigType = {
-  environment: 'dev',
+  environment: "dev",
   serverPort: 3030,
   showWelcomeMessage: true,
   includeDefaultMiddlewares: true,
@@ -56,16 +56,16 @@ class Yelix {
     const config = { ...defaultConfig, ...appConfig };
     this.appConfig = config;
     this.app = new Hono();
-    this.logger = new Logger(this, config.environment === 'debug');
+    this.logger = new Logger(this, config.environment === "debug");
     this.serverManager = new ServerManager(this, this.logger);
     this.docsManager = new DocsManager(this.app);
 
-    if (config.showWelcomeMessage == true && config.environment !== 'test') {
+    if (config.showWelcomeMessage == true && config.environment !== "test") {
       sayWelcome();
     }
 
     if (config.includeDefaultMiddlewares) {
-      this.setMiddleware('*', simpleLoggerMiddeware);
+      this.setMiddleware("*", simpleLoggerMiddeware);
     }
 
     if (config.serveIndexPage) {
@@ -75,16 +75,16 @@ class Yelix {
     if (config.watchDirectory) {
       this.watch();
       const afterWatchDir = config.watchDirectory
-        .replace(Deno.cwd(), '.')
-        .replaceAll('\\', '/');
+        .replace(Deno.cwd(), ".")
+        .replaceAll("\\", "/");
       this.serverManager.addServedInformation({
-        title: 'Watching',
+        title: "Watching",
         description: afterWatchDir,
       });
     }
 
     this.serverManager.addServedInformation({
-      title: 'Environment',
+      title: "Environment",
       description: config.environment,
     });
   }
@@ -108,7 +108,7 @@ class Yelix {
 
   setMiddleware(name: string | RegExp, middleware: Middleware) {
     this.actionMetaList.push({
-      actionTitle: 'setMiddleware',
+      actionTitle: "setMiddleware",
       actionFn: this.setMiddleware.bind(this),
       actionParams: [name, middleware],
     });
@@ -118,7 +118,7 @@ class Yelix {
 
   loadEndpoints(endpointEntries: Endpoint[]) {
     this.actionMetaList.push({
-      actionTitle: 'loadEndpoints',
+      actionTitle: "loadEndpoints",
       actionFn: this.loadEndpoints.bind(this),
       actionParams: [endpointEntries],
     });
@@ -130,16 +130,16 @@ class Yelix {
   }
 
   async loadEndpointsFromFolder(path: string): Promise<void> {
-    const isDenoDeploy = Deno.env.get('DENO_DEPLOYMENT_ID') !== undefined;
+    const isDenoDeploy = Deno.env.get("DENO_DEPLOYMENT_ID") !== undefined;
 
     if (isDenoDeploy) {
-      this.throw('Deno Deploy does not support dynamic imports');
+      this.throw("Deno Deploy does not support dynamic imports");
     }
 
     this.isLoadingEndpoints = true;
 
     this.actionMetaList.push({
-      actionTitle: 'loadEndpointsFromFolder',
+      actionTitle: "loadEndpointsFromFolder",
       actionFn: this.loadEndpointsFromFolder.bind(this),
       actionParams: [path],
     });
@@ -153,7 +153,7 @@ class Yelix {
 
   initOpenAPI(config: InitOpenAPIParams) {
     this.actionMetaList.push({
-      actionTitle: 'initOpenAPI',
+      actionTitle: "initOpenAPI",
       actionFn: this.initOpenAPI.bind(this),
       actionParams: [config],
     });
@@ -164,13 +164,13 @@ class Yelix {
 
   cors(opt: CORSParams) {
     this.actionMetaList.push({
-      actionTitle: 'cors',
+      actionTitle: "cors",
       actionFn: this.cors.bind(this),
       actionParams: [opt],
     });
 
     this.app.use(
-      opt.affectRoute || '*',
+      opt.affectRoute || "*",
       cors({
         origin: opt.origin,
         allowMethods: opt.allowMethods,
@@ -178,30 +178,30 @@ class Yelix {
         maxAge: opt.maxAge,
         credentials: opt.credentials,
         exposeHeaders: opt.exposeHeaders,
-      })
+      }),
     );
   }
 
   async serve() {
     this.actionMetaList.push({
-      actionTitle: 'serve',
+      actionTitle: "serve",
       actionFn: this.serve.bind(this),
       actionParams: [],
     });
 
     if (this.isLoadingEndpoints) {
       this.warn(
-        'Endpoints are still loading, you may not await the loadEndpointsFromFolder method'
+        "Endpoints are still loading, you may not await the loadEndpointsFromFolder method",
       );
     }
 
     serveEndpoints(this, this.docsManager, this.endpointList);
 
-    if (this.appConfig.environment !== 'test') {
+    if (this.appConfig.environment !== "test") {
       // Start server only if not in test mode
       await this.serverManager.startServer(
         this.appConfig.serverPort,
-        this.app.fetch
+        this.app.fetch,
       );
     }
 
@@ -213,8 +213,8 @@ class Yelix {
   }
 
   async watch() {
-    if (typeof this.appConfig.watchDirectory !== 'string') {
-      this.throw('watchDirectory is not defined in appConfig');
+    if (typeof this.appConfig.watchDirectory !== "string") {
+      this.throw("watchDirectory is not defined in appConfig");
       return;
     }
 
@@ -231,9 +231,9 @@ class Yelix {
       for (const event of events) {
         const afterWatchDir = event.paths[0].replace(
           this.appConfig.watchDirectory!, // non-null assertion operator
-          ''
+          "",
         );
-        console.log('⊚ [%s] %s', event.kind, afterWatchDir);
+        console.log("⊚ [%s] %s", event.kind, afterWatchDir);
       }
       this.restartEndpoints();
     }, 200);
@@ -248,15 +248,15 @@ class Yelix {
 
   async restartEndpoints() {
     try {
-      this.logger.clientLog('╓ Restarting server...');
+      this.logger.clientLog("╓ Restarting server...");
       const startms = performance.now();
 
       // Step 1: Gracefully shutdown the current server
-      this.logger.log('║ Shutting down current server...');
+      this.logger.log("║ Shutting down current server...");
       await this.kill(0);
 
       // Step 2: Reset application state
-      this.logger.log('║ Resetting application state...');
+      this.logger.log("║ Resetting application state...");
       this.app = new Hono();
       this.serverManager = new ServerManager(this, this.logger);
       this.docsManager = new DocsManager(this.app);
@@ -280,29 +280,29 @@ class Yelix {
 
       // Step 6: Ensure server gets restarted by explicitly calling serve
       // Find if serve was already called in actions
-      const serveActionExists = actions.some((a) => a.actionTitle === 'serve');
+      const serveActionExists = actions.some((a) => a.actionTitle === "serve");
 
       if (!serveActionExists) {
-        this.logger.log('║ Restarting server...');
+        this.logger.log("║ Restarting server...");
         await this.serve();
       }
 
       const endms = performance.now();
       this.logger.clientLog(
-        '╙ Server restarted successfully in',
+        "╙ Server restarted successfully in",
         Math.round(endms - startms),
-        'ms (+200ms debounce)'
+        "ms (+200ms debounce)",
       );
     } catch (error) {
-      this.logger.throw('Error during server restart:', error);
+      this.logger.throw("Error during server restart:", error);
 
       // Attempt recovery
-      this.logger.clientLog('Attempting recovery...');
+      this.logger.clientLog("Attempting recovery...");
       try {
         await this.serve();
-        this.logger.clientLog('Recovery successful');
+        this.logger.clientLog("Recovery successful");
       } catch (recoveryError) {
-        this.logger.throw('Recovery failed:', recoveryError);
+        this.logger.throw("Recovery failed:", recoveryError);
       }
     }
   }

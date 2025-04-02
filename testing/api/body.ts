@@ -20,6 +20,6 @@ export const middlewares = ["dataValidation"];
 export const validation: ValidationType = {
   body: inp().object({
     username: inp().string().min(3).max(255),
-    email: inp().string().email()
-  })
+    email: inp().string().email(),
+  }),
 };
