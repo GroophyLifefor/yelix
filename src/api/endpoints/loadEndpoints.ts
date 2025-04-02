@@ -9,17 +9,27 @@ import * as path from "jsr:@std/path@1.0.8";
 import type { Yelix } from "@/mod.ts";
 import { buildMiddlewareSteps } from "./middlewareHandler.ts";
 
-async function loadEndpointsFromFolder(yelix: Yelix, _path: string) {
+async function loadEndpointsFromFolder(
+  yelix: Yelix,
+  _path: string,
+): Promise<ParsedEndpoint[]> {
   yelix.log("📂 Loading endpoints from folder", _path);
   const files = Deno.readDirSync(_path);
   const endpoints = [];
 
   for (const file of files) {
-    if (file.isFile) {
+    const fullPath = path.join(_path, file.name);
+
+    if (file.isDirectory) {
+      // Recursively load endpoints from subfolder
+      yelix.log(`📁 Processing subfolder: ${file.name}`);
+      const subEndpoints = await loadEndpointsFromFolder(yelix, fullPath);
+      endpoints.push(...subEndpoints);
+    } else if (file.isFile) {
       yelix.log(`📄 Processing file: ${file.name}`);
       // Add cache busting query parameter to force reload
       const cacheBuster = `?cacheBust=${Date.now()}`;
-      const globePath = "file:" + path.join(_path, file.name) + cacheBuster;
+      const globePath = "file:" + fullPath + cacheBuster;
 
       try {
         // Force reload by bypassing cache
@@ -32,7 +42,7 @@ async function loadEndpointsFromFolder(yelix: Yelix, _path: string) {
     }
   }
 
-  return loadEndpoints(yelix, endpoints);
+  return loadEndpoints(yelix, endpoints.flat());
 }
 
 function loadEndpoints(yelix: Yelix, endpoints: Endpoint[]) {
