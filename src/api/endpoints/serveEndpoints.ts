@@ -29,6 +29,10 @@ function createMethodMap(app: Hono): MethodMap {
   };
 }
 
+function convertParams(path: string) {
+  return path.replaceAll(/:([a-zA-Z0-9_]+)/g, "{$1}");
+}
+
 function serveEndpoints(
   yelix: Yelix,
   docsManager: DocsManager,
@@ -45,8 +49,10 @@ function serveEndpoints(
 
       const isHide = (endpoint?.openAPI as OpenAPIYelixDoc)?.hide ?? false;
 
+      const newPath = convertParams(endpoint.path);
+
       const newAPIDoc: NewEndpointParams = {
-        path: endpoint.path,
+        path: newPath,
         method: method.method.toUpperCase() as OpenAPIMethods,
         title: endpoint.openAPI?.title ?? "",
         description: endpoint.openAPI?.description ?? "",

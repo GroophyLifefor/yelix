@@ -111,6 +111,10 @@ class YelixOpenAPI {
     return schema;
   }
 
+  private getParamsFromPath(path: string) {
+    return [...path.matchAll(/{([a-zA-Z0-9_]+)}/g)].map((match) => match[1]);
+  }
+
   addNewEndpoint(apiDoc: NewEndpointParams) {
     if (!this._openAPI) {
       throw new Error("OpenAPI not initialized");
@@ -143,6 +147,18 @@ class YelixOpenAPI {
 
     const parameters = [];
     const queries = apiDoc.validation?.query;
+
+    const params = this.getParamsFromPath(path);
+    for (const param of params) {
+      parameters.push({
+        name: param,
+        in: "path",
+        required: true,
+        schema: {
+          type: "string",
+        },
+      });
+    }
 
     if (queries) {
       for (const key in queries) {

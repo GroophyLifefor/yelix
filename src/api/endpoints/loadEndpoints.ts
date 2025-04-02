@@ -52,6 +52,12 @@ function loadEndpoints(yelix: Yelix, endpoints: Endpoint[]) {
   for (const [index, endpoint] of endpoints.entries()) {
     yelix.log(`🔍 Processing endpoint ${index + 1}/${endpoints.length}`);
 
+    if ("methods" in endpoint && Array.isArray(endpoint.methods)) {
+      yelix.log(`📍 Found already processed endpoint: ${endpoint.path}`);
+      parsedEndpoints.push(endpoint as unknown as ParsedEndpoint);
+      continue;
+    }
+
     // Look for Path Export, path is required
     const path = endpoint.path;
     if (!path) {
