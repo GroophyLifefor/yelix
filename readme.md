@@ -1,6 +1,6 @@
 # Yelix
 
-[![JSR](https://jsr.io/badges/@murat/yelix)](https://jsr.io/@murat/yelix)
+[![JSR](https://jsr.io/badges/@murat/yelix)](https://jsr.io/@murat/yelix/)
 
 Yelix is a powerful web server library built specifically for
 [Deno](https://deno.land/), leveraging the [Hono](https://hono.dev/) framework
