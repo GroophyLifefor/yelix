@@ -209,7 +209,7 @@ class Yelix {
       };
 
       const descriptionByEventType = {
-        hmr: "Hot Module Reload - Server will restarted.",
+        hmr: "Hot Module Reload - Server will restart.",
       };
 
       const description = descriptionByEventType[
