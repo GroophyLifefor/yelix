@@ -216,29 +216,32 @@ class Yelix {
         event.type as keyof typeof descriptionByEventType
       ] || "Unknown event type";
 
-      this.logger.clientLog("");
+      this.logger.clientLog("╓───────────────────────────────────────────────");
+      this.logger.setPrefix("║ ");
       this.logger.clientLog(
-        "╓ %c[%s], %s",
+        "%c[%s], %s",
         "color: #007acc;",
         event.type.toUpperCase(),
         description,
       );
-      this.logger.clientLog("║ Changed Module Path: %s", event.detail.path);
-      await this.restartEndpoints("║");
+      this.logger.clientLog("Changed Module Path: %s", event.detail.path);
+      await this.restartEndpoints("", "", "");
+      this.logger.endPrefix();
+      this.logger.clientLog("╙───────────────────────────────────────────────");
     });
   }
 
-  async restartEndpoints(startPrefix = "╓") {
+  async restartEndpoints(startPrefix = "╓ ", prefix = "║ ", endPrefix = "╙ ") {
     try {
-      this.logger.clientLog(startPrefix + " Restarting server...");
+      this.logger.clientLog(startPrefix + "Restarting server...");
       const startms = performance.now();
 
       // Step 1: Gracefully shutdown the current server
-      this.logger.log("║ Shutting down current server...");
+      this.logger.log(prefix + "Shutting down current server...");
       await this.kill(0);
 
       // Step 2: Reset application state
-      this.logger.log("║ Resetting application state...");
+      this.logger.log(prefix + "Resetting application state...");
       this.app = new Hono();
       this.serverManager = new ServerManager(this, this.logger);
       this.docsManager = new DocsManager(this.app);
@@ -256,7 +259,7 @@ class Yelix {
 
       // Step 5: Replay actions in order
       for (const meta of actions) {
-        this.logger.log(`║ Running ${meta.actionTitle}...`);
+        this.logger.log(prefix + `Running ${meta.actionTitle}...`);
         await meta.actionFn(...meta.actionParams);
       }
 
@@ -265,13 +268,13 @@ class Yelix {
       const serveActionExists = actions.some((a) => a.actionTitle === "serve");
 
       if (!serveActionExists) {
-        this.logger.log("║ Restarting server...");
+        this.logger.log(prefix + "Restarting server...");
         await this.serve();
       }
 
       const endms = performance.now();
       this.logger.clientLog(
-        "╙ Server restarted successfully in",
+        endPrefix + "Server restarted successfully in",
         Math.round(endms - startms),
         "ms (+200ms debounce)",
       );
