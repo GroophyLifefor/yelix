@@ -1,9 +1,9 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Context } from "hono";
-import type { H } from "hono/types";
-import type { ObjectZod, Yelix, YelixValidationBase } from "@/mod.ts";
-import type { OpenAPIYelixDoc } from "@/src/OpenAPI/index.ts";
-import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
+import type { Context } from 'hono';
+import type { H } from 'hono/types';
+import type { ObjectZod, Yelix, YelixValidationBase } from '@/mod.ts';
+import type { OpenAPIYelixDoc } from '@/src/OpenAPI/index.ts';
+import type { ApiReferenceOptions } from 'npm:@scalar/hono-api-reference@0.5.172';
 
 type Ctx = Context;
 
@@ -49,13 +49,25 @@ type ParsedEndpoint = {
   openAPI?: OpenAPIYelixDoc;
 };
 
+/**
+ * Represents the configuration settings for the application.
+ *
+ * @property environment - Specifies the application environment. Can be one of "dev", "debug", "prod", or "test".
+ * @property serverPort - The port number on which the server will run.
+ * @property showWelcomeMessage - Indicates whether to display a welcome message on startup.
+ * @property includeDefaultMiddlewares - Determines if default middlewares should be included.
+ * @property serveIndexPage - Specifies whether to serve the index page.
+ */
 type AppConfigType = {
-  environment: "dev" | "debug" | "prod" | "test";
+  environment: 'dev' | 'debug' | 'prod' | 'test';
   serverPort: number;
   showWelcomeMessage: boolean;
   includeDefaultMiddlewares: boolean;
   serveIndexPage: boolean;
-  watchDirectory: string | undefined;
+  /**
+   * @deprecated Watch directory is deprecated. Use `--watch-hmr` flag instead.
+   */
+  /// watchDirectory: string | undefined;
 };
 
 type OptionalAppConfigType = {
@@ -65,7 +77,7 @@ type OptionalAppConfigType = {
 type Middleware = (
   request: ApplyMiddlewareParams,
   next: () => Promise<void>,
-  yelix: Yelix,
+  yelix: Yelix
 ) =>
   | Promise<Record<string, unknown>>
   | Record<string, unknown>
