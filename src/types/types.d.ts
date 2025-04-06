@@ -64,10 +64,6 @@ type AppConfigType = {
   showWelcomeMessage: boolean;
   includeDefaultMiddlewares: boolean;
   serveIndexPage: boolean;
-  /**
-   * @deprecated Watch directory is deprecated. Use `--watch-hmr` flag instead.
-   */
-  /// watchDirectory: string | undefined;
 };
 
 type OptionalAppConfigType = {

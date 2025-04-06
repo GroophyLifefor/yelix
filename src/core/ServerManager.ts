@@ -90,6 +90,7 @@ export class ServerManager {
   async kill(forceAfterMs = 3000) {
     if (this.server) {
       try {
+        this.logger.clientLog("Starting graceful server shutdown...");
         this.isGracefulShutdown = true;
         let timeoutId = 0;
         const timeoutPromise = new Promise<void>((resolve) => {
