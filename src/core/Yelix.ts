@@ -58,7 +58,7 @@ class Yelix {
     this.app = new Hono();
     this.logger = new Logger(this, config.environment === "debug");
     this.serverManager = new ServerManager(this, this.logger);
-    this.docsManager = new DocsManager(this.app);
+    this.docsManager = new DocsManager(this.app, this.serverManager);
 
     if (config.showWelcomeMessage == true && config.environment !== "test") {
       sayWelcome();
@@ -158,8 +158,8 @@ class Yelix {
       actionParams: [config],
     });
 
-    const info = this.docsManager.initOpenAPI(config);
-    this.serverManager.addServedInformation(info);
+    const docs = this.docsManager.initOpenAPI(config);
+    return docs.serve;
   }
 
   cors(opt: CORSParams) {
@@ -259,7 +259,7 @@ class Yelix {
       this.logger.log("║ Resetting application state...");
       this.app = new Hono();
       this.serverManager = new ServerManager(this, this.logger);
-      this.docsManager = new DocsManager(this.app);
+      this.docsManager = new DocsManager(this.app, this.serverManager);
       this.middlewares = [];
       this.endpointList = [];
 

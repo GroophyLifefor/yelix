@@ -44,10 +44,10 @@ export class ServerManager {
       );
       const maxLength = Math.max(
         ...this.servedInformations.map((i) => i.title.length),
-      );
+      )+1;
       this.servedInformations.forEach((info) => {
         this.logger.clientLog(
-          `   - ${info.title.padEnd(maxLength)}:   ${info.description}`,
+          `   - ${info.title.padEnd(maxLength)}:  ${info.description}`,
         );
       });
       this.logger.clientLog();
