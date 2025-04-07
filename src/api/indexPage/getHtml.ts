@@ -91,6 +91,7 @@ function getHtml({
       display: flex;
       padding: 12px;
       border-radius: 8px;
+      text-align: left;
     }
 
     li img {
@@ -105,12 +106,14 @@ function getHtml({
       font-size: 1.5rem;
       color: #3490dc;
       font-weight: 600;
+      line-height: 1;
     }
 
     li div {
       display: flex;
       flex-direction: column;
       align-items: start;
+      gap: 4px;
     }
 
     a {
