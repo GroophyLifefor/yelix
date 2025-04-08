@@ -1,5 +1,5 @@
 import type { ValidationType, YelixValidationBase } from "@/mod.ts";
-import type { AllowedLicenses } from "./index.ts";
+import type { AllowedLicenses } from "../Core/index.ts";
 
 type OpenAPIMethods = "POST" | "GET" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
 

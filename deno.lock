@@ -11,6 +11,8 @@
     "jsr:@std/path@1.0.8": "1.0.8",
     "jsr:@std/path@^1.0.8": "1.0.8",
     "jsr:@std/testing@*": "1.0.9",
+    "npm:@hono/swagger-ui@*": "0.5.1_hono@4.7.1",
+    "npm:@hono/swagger-ui@~0.5.1": "0.5.1_hono@4.7.1",
     "npm:@hono/zod-openapi@~0.18.4": "0.18.4_hono@4.7.1_zod@3.24.1",
     "npm:@scalar/hono-api-reference@*": "0.5.172_hono@4.7.1",
     "npm:@scalar/hono-api-reference@0.5.172": "0.5.172_hono@4.7.1",
@@ -252,6 +254,12 @@
       "dependencies": [
         "@tanstack/vue-virtual",
         "vue"
+      ]
+    },
+    "@hono/swagger-ui@0.5.1_hono@4.7.1": {
+      "integrity": "sha512-XpUCfszLJ9b1rtFdzqOSHfdg9pfBiC2J5piEjuSanYpDDTIwpMz0ciiv5N3WWUaQpz9fEgH8lttQqL41vIFuDA==",
+      "dependencies": [
+        "hono"
       ]
     },
     "@hono/zod-openapi@0.18.4_hono@4.7.1_zod@3.24.1": {
@@ -2020,6 +2028,11 @@
       "npm:@hono/zod-openapi@~0.18.4",
       "npm:hono-openapi@~0.4.4",
       "npm:hono@^4.7.0"
-    ]
+    ],
+    "packageJson": {
+      "dependencies": [
+        "npm:@hono/swagger-ui@~0.5.1"
+      ]
+    }
   }
 }
