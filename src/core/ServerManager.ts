@@ -44,7 +44,7 @@ export class ServerManager {
       );
       const maxLength = Math.max(
         ...this.servedInformations.map((i) => i.title.length),
-      )+1;
+      ) + 1;
       this.servedInformations.forEach((info) => {
         this.logger.clientLog(
           `   - ${info.title.padEnd(maxLength)}:  ${info.description}`,
@@ -58,7 +58,7 @@ export class ServerManager {
     this.servedInformations.push(info);
   }
 
-  startServer(port: number, appFetch: any) {
+  startServer(port: number, appFetch: any): Promise<void> {
     this.sigintListener = () => {
       yelixClientLog("interrupted!");
       this.kill();

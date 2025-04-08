@@ -5,10 +5,10 @@ import type {
   AddOpenAPIEndpointResponseParams,
   OpenAPIMethods,
   OpenAPIYelixDoc,
-} from "@/src/OpenAPI/index.ts";
+} from "../../OpenAPI/Core/index.ts";
 import type { Yelix } from "@/src/core/Yelix.ts";
-import type { NewEndpointParams } from "@/src/OpenAPI/index.ts";
-import type { DocsManager } from "@/src/core/DocsManager.ts";
+import type { NewEndpointParams } from "../../OpenAPI/Core/index.ts";
+import type { DocsManager } from "../../OpenAPI/DocsManager.ts";
 
 interface MethodMap {
   [key: string]: (path: string, ...handlers: H[]) => void;

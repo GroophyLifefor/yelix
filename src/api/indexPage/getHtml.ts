@@ -1,5 +1,5 @@
-import type { Ctx, Yelix } from '@/mod.ts';
-import type { DocsManager } from '@/src/core/DocsManager.ts';
+import type { Ctx, Yelix } from "@/mod.ts";
+import type { DocsManager } from "../../OpenAPI/DocsManager.ts";
 
 type IndexPageParams = {
   yelix: Yelix;
@@ -9,14 +9,14 @@ type IndexPageParams = {
 
 export function serveIndexPage(params: IndexPageParams) {
   params.yelix.app.notFound((ctx: Ctx) => {
-    if (ctx.req.path === '/') {
+    if (ctx.req.path === "/") {
       return ctx.html(
         getHtml({ docsPaths: params.docsManager.servedPaths }),
-        200
+        200,
       );
     }
 
-    return new Response('Not Found', { status: 404 });
+    return new Response("Not Found", { status: 404 });
   });
 }
 
@@ -37,7 +37,7 @@ function getHtml({
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to Yelix</title>
   <link rel="icon" type="image/png" href="https://docs.yelix.dev/img/yelix-logo-w512.png" />
-  <meta name="description" content="Yelix - A powerful web server library">
+  <meta name="description" content="Yelix - A powerful web server framework">
   <style>
     body {
       margin: 0;
@@ -236,28 +236,32 @@ function getHtml({
 <body>
   <div class="container">
     <h1>Welcome to Yelix</h1>
-    <p>A powerful web server library</p>
+    <p>A powerful web server framework</p>
     ${
-      docsPaths && docsPaths.length > 0
-        ? `<p class="apireftitle">API References</p>
+    docsPaths && docsPaths.length > 0
+      ? `<p class="apireftitle">API References</p>
            <ul>
-             ${docsPaths
-               .map(
-                 ({ key, path }) =>
-                   `<li>
+             ${
+        docsPaths
+          .map(
+            ({ key, path }) =>
+              `<li>
                       <a href="${path}" target="_blank">
-                        <img src="https://docs.yelix.dev/img/${key}-logo.png" alt="docs" width="20" height="20">
+                        <img src="https://docs.yelix.dev/img/${
+                key.toLowerCase().replace(/\s+/g, "-")
+              }-logo.png" alt="docs" width="20" height="20">
                         <div>
                           <h4>${uppercaseFirstChar(key)}</h4>
                           <span>Move to ${key} API Reference</span>
                         </div>
                       </a>
-                   </li>`
-               )
-               .join('')}
+                   </li>`,
+          )
+          .join("")
+      }
            </ul>`
-        : ''
-    }
+      : ""
+  }
   </div>
 </body>
 </html>

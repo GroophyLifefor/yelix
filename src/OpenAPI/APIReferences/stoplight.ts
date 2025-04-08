@@ -1,4 +1,26 @@
-export function getStoplightHTML(pageTitle: string, spec: string) {
+import { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
+import type { Ctx } from "@/mod.ts";
+
+export class StoplightReference extends APIReferenceBase {
+  override referenceTitle = "Stoplight";
+  override path = "/stoplight";
+
+  constructor(path?: string) {
+    const _path = path || "/stoplight";
+    super(_path);
+
+    this.path = _path;
+  }
+
+  override getResponse(ctx: Ctx): Response | Promise<Response> {
+    const pageTitle = this.referenceTitle + " | Yelix API Docs";
+    const spec = "/yelix-openapi-raw";
+    const html = getStoplightHTML(pageTitle, spec);
+    return ctx.html(html, 200);
+  }
+}
+
+function getStoplightHTML(pageTitle: string, spec: string) {
   return `<!doctype html>
 <html lang="en">
   <head>

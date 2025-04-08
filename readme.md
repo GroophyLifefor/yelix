@@ -2,7 +2,7 @@
 
 [![JSR](https://jsr.io/badges/@murat/yelix)](https://jsr.io/@murat/yelix/)
 
-Yelix is a powerful web server library built specifically for
+Yelix is a powerful web server framework built specifically for
 [Deno](https://deno.land/), leveraging the [Hono](https://hono.dev/) framework
 in the background. It simplifies backend development with automated features,
 including built-in data validation, OpenAPI 3.1 support, and auto-generated
@@ -74,10 +74,10 @@ deno task dev
 <details>
 <summary>Technical Information</summary>
 
-
 ### Generated Files
 
-When you run `deno task dev`, actually, it runs 
+When you run `deno task dev`, actually, it runs
+
 ```
 deno run --watch --allow-run --allow-net --allow-read --allow-env https://docs.yelix.dev/dev.ts
 ```
@@ -86,22 +86,34 @@ deno run --watch --allow-run --allow-net --allow-read --allow-env https://docs.y
 
 When you run this command:
 
-1. **Run dev.ts via Dev task**: When you run `deno task dev`, it executes the `dev.ts` script.
-2. 1. **Endpoint Resolution**: The `resolveEndpoints.ts` script scans your `api` directory and generates proper static imports in `endpoints.ts`.
-1. 2. **Server Startup**: The Yelix server (`main.ts`) loads these endpoints and starts listening for requests
-2. 3. **File Watching**: Two watchers run simultaneously:
-      - One watches the `api` folder and regenerates `endpoints.ts` when files change
+1. **Run dev.ts via Dev task**: When you run `deno task dev`, it executes the
+   `dev.ts` script.
+2.
+   1. **Endpoint Resolution**: The `resolveEndpoints.ts` script scans your `api`
+      directory and generates proper static imports in `endpoints.ts`.
+3.
+   2. **Server Startup**: The Yelix server (`main.ts`) loads these endpoints and
+      starts listening for requests
+4.
+   3. **File Watching**: Two watchers run simultaneously:
+      - One watches the `api` folder and regenerates `endpoints.ts` when files
+        change
       - Another watches your entire project and restarts the server when needed
-3. 4. **Sibling closure**: When your `main.ts` process is terminated, the resolver process is also terminated. This ensures that all processes are properly cleaned up.
+5.
+   4. **Sibling closure**: When your `main.ts` process is terminated, the
+      resolver process is also terminated. This ensures that all processes are
+      properly cleaned up.
 
 ## Technical Implementation
 
 The `dev.ts` script orchestrates this process by:
+
 - Spawning the resolver process with file watching enabled
 - Running the main server with the `--watch` flag for hot reloading
 - Managing process lifecycle and termination
 
-The resolver handles the critical task of transforming your directory structure into Deno Deploy-compatible static imports, creating entries like:
+The resolver handles the critical task of transforming your directory structure
+into Deno Deploy-compatible static imports, creating entries like:
 
 ```typescript
 // In endpoints.ts (auto-generated)
@@ -114,12 +126,15 @@ const endpoints = [
 
 ## Why This Matters
 
-Deno Deploy has a strict requirement: imports must be static string literals. This architecture automatically handles this constraint while providing a seamless development experience where you can add new API endpoints without manually updating imports.
+Deno Deploy has a strict requirement: imports must be static string literals.
+This architecture automatically handles this constraint while providing a
+seamless development experience where you can add new API endpoints without
+manually updating imports.
 
-You can focus on building your API endpoints while the system handles the deployment compatibility for you.
+You can focus on building your API endpoints while the system handles the
+deployment compatibility for you.
 
 </details>
-
 
 Visit `http://localhost:3030/api/hello` to see your endpoint in action.
 

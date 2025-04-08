@@ -1,6 +1,6 @@
 // deno-lint-ignore-file no-explicit-any
-import type { OpenAPI, OpenAPIDefaultSchema } from "@/src/OpenAPI/index.ts";
-import type { NewEndpointParams, OpenAPIParams } from "@/src/OpenAPI/index.ts";
+import type { OpenAPI, OpenAPIDefaultSchema } from "./Core/index.ts";
+import type { NewEndpointParams, OpenAPIParams } from "./Core/index.ts";
 import { inp, YelixValidationBase } from "@/mod.ts";
 
 class YelixOpenAPI {
@@ -20,7 +20,15 @@ class YelixOpenAPI {
     };
   }
 
-  customValidationDescription(kind: string, fn: (_: any) => string): boolean {
+  /**
+   * Registers a custom validation rule description for a specific kind.
+   * If a description for the given kind already exists, it will be overridden.
+   *
+   * @param kind - The type of validation rule to describe.
+   * @param fn - A function that takes any input and returns a string describing the validation rule.
+   * @returns A boolean indicating whether an existing description was overridden (`true`) or not (`false`).
+   */
+  describeValidationRule(kind: string, fn: (_: any) => string): boolean {
     let isOverriding = false;
 
     if (this.customValidationDescriptions[kind]) {
@@ -31,7 +39,7 @@ class YelixOpenAPI {
     return isOverriding;
   }
 
-  getCustomValidationDescription(kind: string): (_: any) => string {
+  getValidationRuleDescription(kind: string): (_: any) => string {
     return this.customValidationDescriptions[kind];
   }
 
@@ -188,7 +196,7 @@ class YelixOpenAPI {
 
           const zodRules = query.rules || [];
           for (const rule of zodRules) {
-            const customDescription = this.getCustomValidationDescription(
+            const customDescription = this.getValidationRuleDescription(
               rule.title,
             );
 

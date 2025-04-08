@@ -1,4 +1,26 @@
-export function getRedocHTML(pageTitle: string, spec: string) {
+import { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
+import type { Ctx } from "@/mod.ts";
+
+export class RedocReference extends APIReferenceBase {
+  override referenceTitle = "Redoc";
+  override path = "/redoc";
+
+  constructor(path?: string) {
+    const _path = path || "/redoc";
+    super(_path);
+
+    this.path = _path;
+  }
+
+  override getResponse(ctx: Ctx): Response | Promise<Response> {
+    const pageTitle = this.referenceTitle + " | Yelix API Docs";
+    const spec = "/yelix-openapi-raw";
+    const html = getRedocHTML(pageTitle, spec);
+    return ctx.html(html, 200);
+  }
+}
+
+function getRedocHTML(pageTitle: string, spec: string) {
   return `<!DOCTYPE html>
 <html>
   <head>

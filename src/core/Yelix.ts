@@ -21,8 +21,9 @@ import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 import { cors } from "hono/cors";
 import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
-import { DocsManager } from "./DocsManager.ts";
+import { DocsManager } from "../OpenAPI/DocsManager.ts";
 import { debounce } from "@/src/utils/debounce.ts";
+import type { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
 
 const defaultConfig: AppConfigType = {
   environment: "dev",
@@ -58,7 +59,7 @@ class Yelix {
     this.app = new Hono();
     this.logger = new Logger(this, config.environment === "debug");
     this.serverManager = new ServerManager(this, this.logger);
-    this.docsManager = new DocsManager(this.app, this.serverManager);
+    this.docsManager = new DocsManager(this, this.serverManager);
 
     if (config.showWelcomeMessage == true && config.environment !== "test") {
       sayWelcome();
@@ -151,15 +152,24 @@ class Yelix {
     this.isLoadingEndpoints = false;
   }
 
-  initOpenAPI(config: InitOpenAPIParams) {
+  initOpenAPI(config: InitOpenAPIParams): void {
     this.actionMetaList.push({
       actionTitle: "initOpenAPI",
       actionFn: this.initOpenAPI.bind(this),
       actionParams: [config],
     });
 
-    const docs = this.docsManager.initOpenAPI(config);
-    return docs.serve;
+    this.docsManager.initOpenAPI(config);
+  }
+
+  serveAPIReference(APIReference: APIReferenceBase) {
+    this.actionMetaList.push({
+      actionTitle: "serveAPIReference",
+      actionFn: this.serveAPIReference.bind(this),
+      actionParams: [APIReference],
+    });
+
+    this.docsManager.serveAPIReference(APIReference);
   }
 
   cors(opt: CORSParams) {
@@ -259,7 +269,7 @@ class Yelix {
       this.logger.log("║ Resetting application state...");
       this.app = new Hono();
       this.serverManager = new ServerManager(this, this.logger);
-      this.docsManager = new DocsManager(this.app, this.serverManager);
+      this.docsManager = new DocsManager(this, this.serverManager);
       this.middlewares = [];
       this.endpointList = [];
 
