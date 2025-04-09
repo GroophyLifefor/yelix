@@ -35,7 +35,7 @@ abstract class AbstractValidationBase<T = any> {
   abstract rules: ValidationRule[];
   abstract type: string;
   abstract getType: "get" | "getAll";
-  
+
   protected abstract removeRule(title: string): void;
   abstract hasRule(title: string): boolean;
   abstract addRule(
@@ -170,7 +170,7 @@ class YelixValidationBase<T = any> extends AbstractValidationBase<T> {
   }
 }
 
-export { YelixValidationBase, AbstractValidationBase };
+export { AbstractValidationBase, YelixValidationBase };
 export type {
   FailedMessage,
   Rule,

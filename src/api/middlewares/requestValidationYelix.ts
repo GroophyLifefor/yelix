@@ -1,19 +1,33 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Ctx, Middleware, ValidationError, ValidationType } from "@/mod.ts";
+import type {
+  Ctx,
+  Middleware,
+  ValidationError,
+  ValidationType,
+} from "@/mod.ts";
 
-export function getValidatedBody<T>(ctx: Ctx, defaultValue: T | null = null): T {
-  const data = ctx.get('dataValidation')?.user?.body
-  return data !== undefined ? data : defaultValue
+export function getValidatedBody<T>(
+  ctx: Ctx,
+  defaultValue: T | null = null,
+): T {
+  const data = ctx.get("dataValidation")?.user?.body;
+  return data !== undefined ? data : defaultValue;
 }
 
-export function getValidatedQuery<T>(ctx: Ctx, defaultValue: T | null = null): T {
-  const data = ctx.get('dataValidation')?.user?.query
-  return data !== undefined ? data : defaultValue
+export function getValidatedQuery<T>(
+  ctx: Ctx,
+  defaultValue: T | null = null,
+): T {
+  const data = ctx.get("dataValidation")?.user?.query;
+  return data !== undefined ? data : defaultValue;
 }
 
-export function getValidatedFormData<T>(ctx: Ctx, defaultValue: T | null = null): T {
-  const data = ctx.get('dataValidation')?.user?.formData
-  return data !== undefined ? data : defaultValue
+export function getValidatedFormData<T>(
+  ctx: Ctx,
+  defaultValue: T | null = null,
+): T {
+  const data = ctx.get("dataValidation")?.user?.formData;
+  return data !== undefined ? data : defaultValue;
 }
 
 function lookNewKey(key: string, msg: any): { key: string; message: string } {
@@ -158,7 +172,7 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
       query,
       body,
       formData,
-      validation
+      validation,
     },
   };
 };

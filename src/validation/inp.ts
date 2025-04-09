@@ -1,19 +1,17 @@
-import { FileZod } from '@/src/validation/FileZod.ts';
-import { StringZod } from '@/src/validation/StringZod.ts';
-import { ObjectZod } from '@/src/validation/ObjectZod.ts';
-import { NumberZod } from '@/src/validation/NumberZod.ts';
-import { ArrayZod } from '@/src/validation/ArrayZod.ts';
-import { DateZod } from '@/src/validation/DateZod.ts';
-import { BooleanZod } from '@/src/validation/BooleanZod.ts';
-import { AnyZod } from '@/src/validation/AnyZod.ts';
-import type { DateConfig, YelixValidationBase } from '@/mod.ts';
+import { FileZod } from "@/src/validation/FileZod.ts";
+import { StringZod } from "@/src/validation/StringZod.ts";
+import { ObjectZod } from "@/src/validation/ObjectZod.ts";
+import { NumberZod } from "@/src/validation/NumberZod.ts";
+import { ArrayZod } from "@/src/validation/ArrayZod.ts";
+import { DateZod } from "@/src/validation/DateZod.ts";
+import { BooleanZod } from "@/src/validation/BooleanZod.ts";
+import { AnyZod } from "@/src/validation/AnyZod.ts";
+import type { DateConfig, YelixValidationBase } from "@/mod.ts";
 
-export type Infer<T> = T extends YelixValidationBase<infer U>
-  ? U
+export type Infer<T> = T extends YelixValidationBase<infer U> ? U
   : T extends { [key: string]: YelixValidationBase<infer U> }
-  ? { [K in keyof T]: Infer<T[K]> }
-  : T extends ArrayZod<infer U>
-  ? U[] // Extract the element type inside an ArrayZod
+    ? { [K in keyof T]: Infer<T[K]> }
+  : T extends ArrayZod<infer U> ? U[] // Extract the element type inside an ArrayZod
   : never;
 
 function inp(): YelixInput {
@@ -36,7 +34,7 @@ class YelixInput {
 
   file(): FileZod {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new FileZod(this) as FileZod;
@@ -46,7 +44,7 @@ class YelixInput {
 
   string(): StringZod {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new StringZod(this);
@@ -56,10 +54,10 @@ class YelixInput {
 
   // deno-lint-ignore no-explicit-any
   object<T extends Record<string, YelixValidationBase<any>>>(
-    obj?: T
+    obj?: T,
   ): ObjectZod<T> {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new ObjectZod(this, obj);
@@ -69,7 +67,7 @@ class YelixInput {
 
   number(): NumberZod {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new NumberZod(this);
@@ -78,10 +76,10 @@ class YelixInput {
   }
 
   array<T>(
-    validator?: YelixValidationBase
+    validator?: YelixValidationBase,
   ): ArrayZod<T | Infer<typeof validator>> {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     if (validator) {
@@ -97,7 +95,7 @@ class YelixInput {
 
   date(config?: DateConfig): DateZod {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new DateZod(this, config);
@@ -107,7 +105,7 @@ class YelixInput {
 
   boolean(): BooleanZod {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new BooleanZod(this);
@@ -117,7 +115,7 @@ class YelixInput {
 
   any(): AnyZod {
     if (this._zod) {
-      throw new Error('Input type already set.');
+      throw new Error("Input type already set.");
     }
 
     const zod = new AnyZod(this);

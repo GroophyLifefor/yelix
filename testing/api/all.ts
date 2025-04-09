@@ -6,24 +6,26 @@ import {
   type Infer,
   inp,
   type OpenAPIDoc,
-} from '@/mod.ts';
-import { YelixCache } from '@/src/utils/cache.ts';
+} from "@/mod.ts";
+import { YelixCache } from "@/src/utils/cache.ts";
 
 export const cache = new YelixCache<string>();
 
 // API endpoint handler
 export async function GET(ctx: Ctx) {
   const query = getValidatedQuery<Infer<typeof validation.query>>(ctx);
-  const body = getValidatedBody<Infer<typeof validation.body.subFields>>(ctx);
-  const formData = getValidatedFormData<Infer<typeof validation.formData>>(ctx);
+  const _body = getValidatedBody<Infer<typeof validation.body.subFields>>(ctx);
+  const _formData = getValidatedFormData<Infer<typeof validation.formData>>(
+    ctx,
+  );
 
-  const data = 'Hello, ' + query.name;
+  const data = "Hello, " + query.name;
   return await ctx.text(data, 200);
 }
 
 // API endpoint configs
-export const path = '/api/query';
-export const middlewares = ['dataValidation'];
+export const path = "/api/query";
+export const middlewares = ["dataValidation"];
 
 // API endpoint data validation
 export const validation = {
@@ -51,10 +53,10 @@ export const validation = {
 };
 
 export const openAPI: OpenAPIDoc = {
-  description: 'Get user.',
+  description: "Get user.",
   responses: {
     200: {
-      type: 'application/json',
+      type: "application/json",
       zodSchema: inp().string(),
     },
   },

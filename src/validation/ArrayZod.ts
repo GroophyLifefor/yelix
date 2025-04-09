@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Infer, YelixInput } from "@/src/validation/inp.ts";
+import type { YelixInput } from "@/src/validation/inp.ts";
 import {
   type FailedMessage,
   YelixValidationBase,
