@@ -1,7 +1,21 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Middleware, ValidationError, ValidationType } from "@/mod.ts";
+import type { Ctx, Middleware, ValidationError, ValidationType } from "@/mod.ts";
 
-// Move function to module scope
+export function getValidatedBody<T>(ctx: Ctx, defaultValue: T | null = null): T {
+  const data = ctx.get('dataValidation')?.user?.body
+  return data !== undefined ? data : defaultValue
+}
+
+export function getValidatedQuery<T>(ctx: Ctx, defaultValue: T | null = null): T {
+  const data = ctx.get('dataValidation')?.user?.query
+  return data !== undefined ? data : defaultValue
+}
+
+export function getValidatedFormData<T>(ctx: Ctx, defaultValue: T | null = null): T {
+  const data = ctx.get('dataValidation')?.user?.formData
+  return data !== undefined ? data : defaultValue
+}
+
 function lookNewKey(key: string, msg: any): { key: string; message: string } {
   if (typeof msg === "object" && msg !== null) {
     const newKey = key + (key.length === 0 ? "" : ".") + (msg.key || "");
@@ -144,6 +158,7 @@ const requestDataValidationYelixMiddleware: Middleware = async (request) => {
       query,
       body,
       formData,
+      validation
     },
   };
 };

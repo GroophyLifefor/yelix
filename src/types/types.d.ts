@@ -1,20 +1,16 @@
 // deno-lint-ignore-file no-explicit-any
-import type { Context } from "hono";
-import type { H } from "hono/types";
-import type { ObjectZod, Yelix, YelixValidationBase } from "@/mod.ts";
-import type { OpenAPIYelixDoc } from "@/src/OpenAPI/index.ts";
-import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
+import type { Context } from 'hono';
+import type { H } from 'hono/types';
+import type { ObjectZod, Yelix, YelixValidationBase } from '@/mod.ts';
+import type { OpenAPIYelixDoc } from '@/src/OpenAPI/index.ts';
+import type { ApiReferenceOptions } from 'npm:@scalar/hono-api-reference@0.5.172';
 
 type Ctx = Context;
 
 type ValidationType = {
-  query?: {
-    [key: string]: YelixValidationBase;
-  };
-  body?: ObjectZod;
-  formData?: {
-    [key: string]: YelixValidationBase;
-  };
+  query?: Record<string, YelixValidationBase>;
+  body?: ObjectZod<any>;
+  formData?: Record<string, YelixValidationBase>;
 };
 
 type EndpointHandler = (ctx: Ctx) => Promise<any> | any;
@@ -50,7 +46,7 @@ type ParsedEndpoint = {
 };
 
 type AppConfigType = {
-  environment: "dev" | "debug" | "prod" | "test";
+  environment: 'dev' | 'debug' | 'prod' | 'test';
   serverPort: number;
   showWelcomeMessage: boolean;
   includeDefaultMiddlewares: boolean;
@@ -65,7 +61,7 @@ type OptionalAppConfigType = {
 type Middleware = (
   request: ApplyMiddlewareParams,
   next: () => Promise<void>,
-  yelix: Yelix,
+  yelix: Yelix
 ) =>
   | Promise<Record<string, unknown>>
   | Record<string, unknown>

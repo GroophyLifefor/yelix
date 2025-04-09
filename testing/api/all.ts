@@ -1,5 +1,7 @@
 import {
   type Ctx,
+  getValidatedBody,
+  getValidatedFormData,
   getValidatedQuery,
   type Infer,
   inp,
@@ -12,6 +14,8 @@ export const cache = new YelixCache<string>();
 // API endpoint handler
 export async function GET(ctx: Ctx) {
   const query = getValidatedQuery<Infer<typeof validation.query>>(ctx);
+  const body = getValidatedBody<Infer<typeof validation.body.subFields>>(ctx);
+  const formData = getValidatedFormData<Infer<typeof validation.formData>>(ctx);
 
   const data = 'Hello, ' + query.name;
   return await ctx.text(data, 200);
@@ -21,17 +25,29 @@ export async function GET(ctx: Ctx) {
 export const path = '/api/query';
 export const middlewares = ['dataValidation'];
 
-export const t =  {
-  name: inp().string().min(3),
-  age: inp().string().toNumber().min(18),
-};
-
 // API endpoint data validation
 export const validation = {
   query: {
     name: inp().string().min(3),
     age: inp().string().toNumber().min(18),
   },
+  body: inp().object({
+    name: inp().string(),
+    age: inp().number(),
+  }),
+  formData: {
+    photoName: inp().string(),
+    photos: inp().file().multipleFiles(),
+    age: inp().number(),
+    createdAt: inp().date(),
+  },
+  string: inp().string(),
+  number: inp().number(),
+  boolean: inp().boolean(),
+  date: inp().date(),
+  file: inp().file(),
+  fileMultiple: inp().file().multipleFiles(),
+  array: inp().array(inp().string()),
 };
 
 export const openAPI: OpenAPIDoc = {

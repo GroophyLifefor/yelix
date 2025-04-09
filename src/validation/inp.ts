@@ -1,43 +1,34 @@
-import { FileZod } from "@/src/validation/FileZod.ts";
-import { StringZod } from "@/src/validation/StringZod.ts";
-import { ObjectZod } from "@/src/validation/ObjectZod.ts";
-import { NumberZod } from "@/src/validation/NumberZod.ts";
-import { ArrayZod } from "@/src/validation/ArrayZod.ts";
-import { DateZod } from "@/src/validation/DateZod.ts";
-import { BooleanZod } from "@/src/validation/BooleanZod.ts";
-import { AnyZod } from "@/src/validation/AnyZod.ts";
-import type { DateConfig, UnknownObject } from "@/mod.ts";
+import { FileZod } from '@/src/validation/FileZod.ts';
+import { StringZod } from '@/src/validation/StringZod.ts';
+import { ObjectZod } from '@/src/validation/ObjectZod.ts';
+import { NumberZod } from '@/src/validation/NumberZod.ts';
+import { ArrayZod } from '@/src/validation/ArrayZod.ts';
+import { DateZod } from '@/src/validation/DateZod.ts';
+import { BooleanZod } from '@/src/validation/BooleanZod.ts';
+import { AnyZod } from '@/src/validation/AnyZod.ts';
+import type { DateConfig, YelixValidationBase } from '@/mod.ts';
 
-export type InferStringInput = string;
+export type Infer<T> = T extends YelixValidationBase<infer U>
+  ? U
+  : T extends { [key: string]: YelixValidationBase<infer U> }
+  ? { [K in keyof T]: Infer<T[K]> }
+  : T extends ArrayZod<infer U>
+  ? U[] // Extract the element type inside an ArrayZod
+  : never;
 
-export type InferFileInput = {
-  name: string;
-  size: number;
-  type: string;
-  content?: File | Blob;
-};
-
-export type InferMultipleFileInput = Array<InferFileInput>;
-
-export type InferYelixInput<T> = T extends ReturnType<YelixInput["string"]>
-  ? InferStringInput
-  // deno-lint-ignore no-explicit-any
-  : T extends ReturnType<YelixInput["file"]> & { multipleFiles(): any }
-    ? InferMultipleFileInput
-  : T extends ReturnType<YelixInput["file"]> ? InferFileInput
-  : unknown;
-
-export type InferYelixSchema<T> = {
-  [K in keyof T]: InferYelixInput<T[K]>;
-};
+function inp(): YelixInput {
+  return new YelixInput();
+}
 
 class YelixInput {
   private _zod:
     | FileZod
     | StringZod
-    | ObjectZod
+    // deno-lint-ignore no-explicit-any
+    | ObjectZod<any>
     | NumberZod
-    | ArrayZod
+    // deno-lint-ignore no-explicit-any
+    | ArrayZod<any>
     | DateZod
     | BooleanZod
     | AnyZod
@@ -45,7 +36,7 @@ class YelixInput {
 
   file(): FileZod {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
     const zod = new FileZod(this) as FileZod;
@@ -55,7 +46,7 @@ class YelixInput {
 
   string(): StringZod {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
     const zod = new StringZod(this);
@@ -63,19 +54,22 @@ class YelixInput {
     return zod;
   }
 
-  object(_obj?: UnknownObject): ObjectZod {
+  // deno-lint-ignore no-explicit-any
+  object<T extends Record<string, YelixValidationBase<any>>>(
+    obj?: T
+  ): ObjectZod<T> {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
-    const zod = new ObjectZod(this, _obj);
+    const zod = new ObjectZod(this, obj);
     this._zod = zod;
     return zod;
   }
 
   number(): NumberZod {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
     const zod = new NumberZod(this);
@@ -83,19 +77,27 @@ class YelixInput {
     return zod;
   }
 
-  array(): ArrayZod {
+  array<T>(
+    validator?: YelixValidationBase
+  ): ArrayZod<T | Infer<typeof validator>> {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
-    const zod = new ArrayZod(this);
+    if (validator) {
+      const v = new ArrayZod<Infer<typeof validator>>(this);
+      this._zod = v;
+      return v;
+    }
+
+    const zod = new ArrayZod<T>(this);
     this._zod = zod;
     return zod;
   }
 
   date(config?: DateConfig): DateZod {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
     const zod = new DateZod(this, config);
@@ -105,7 +107,7 @@ class YelixInput {
 
   boolean(): BooleanZod {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
     const zod = new BooleanZod(this);
@@ -115,7 +117,7 @@ class YelixInput {
 
   any(): AnyZod {
     if (this._zod) {
-      throw new Error("Input type already set.");
+      throw new Error('Input type already set.');
     }
 
     const zod = new AnyZod(this);
@@ -124,8 +126,5 @@ class YelixInput {
   }
 }
 
-function inp(): YelixInput {
-  return new YelixInput();
-}
-
+// Export the function and class at the end
 export { inp, YelixInput };
