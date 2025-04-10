@@ -5,7 +5,7 @@ import {
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
 
-class NumberZod extends YelixValidationBase {
+class NumberZod extends YelixValidationBase<number> {
   input: YelixInput;
   override type: string = "number";
 

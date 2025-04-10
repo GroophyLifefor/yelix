@@ -1,39 +1,53 @@
 // deno-lint-ignore-file no-explicit-any
 import type { YelixInput } from "@/src/validation/inp.ts";
 import {
+  type AbstractValidationBase,
   type FailedMessage,
-  type UnknownObject,
   type ValidateConfig,
   type ValidateResult,
   type ValidationError,
   YelixValidationBase,
 } from "@/mod.ts";
 
-class ObjectZod extends YelixValidationBase {
+type Mutable<T> = { -readonly [K in keyof T]: T[K] };
+
+class ObjectZod<T extends Record<string, AbstractValidationBase<any>>>
+  extends YelixValidationBase<T> {
   input: YelixInput;
-  subFields: UnknownObject = {};
+  subFields: Mutable<T>;
   override type: string = "object";
 
-  constructor(_input: YelixInput, obj?: UnknownObject) {
+  constructor(_input: YelixInput, obj?: T) {
     super();
     this.input = _input;
 
     this.required();
     this.isValidType();
 
-    this.loadKeys(obj);
+    this.subFields = obj ?? ({} as T);
+    this.loadKeys(this.subFields);
   }
 
-  private setSubField(key: string, value: YelixValidationBase) {
-    this.subFields[key] = value;
+  private setSubField<K extends keyof T>(
+    key: K,
+    value: YelixValidationBase<any>,
+  ) {
+    this.subFields[key] = value as unknown as T[K];
   }
 
-  private loadKeys(obj?: UnknownObject) {
+  private loadKeys(obj?: T) {
     if (obj) {
       Object.keys(obj).forEach((key) => {
-        this.setSubField(key, obj[key]);
+        this.setSubField(
+          key as keyof T,
+          obj[key] as unknown as YelixValidationBase<any>,
+        );
       });
     }
+  }
+
+  getSchema(): T {
+    return this.subFields;
   }
 
   required(failedMessage?: FailedMessage): this {
@@ -144,13 +158,15 @@ class ObjectZod extends YelixValidationBase {
       const fieldResult = validator.validate(fieldValue);
 
       if (!fieldResult.isOk) {
-        fieldResult.errors.forEach((error) => {
-          subFieldErrors.push({
-            message: error.message,
-            key: `${key}.${error.key || ""}`.replace(/\.$/, ""),
-            from: error.from,
-          });
-        });
+        fieldResult.errors.forEach(
+          (error: { message: string; key: string; from: string }) => {
+            subFieldErrors.push({
+              message: error.message,
+              key: `${key}.${error.key || ""}`.replace(/\.$/, ""),
+              from: error.from as "query" | "body" | "formData",
+            });
+          },
+        );
       }
     }
 

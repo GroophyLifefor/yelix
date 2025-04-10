@@ -5,7 +5,7 @@ import {
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
 
-class ArrayZod extends YelixValidationBase {
+class ArrayZod<T> extends YelixValidationBase<T[]> {
   input: YelixInput;
   override type: string = "array";
 
@@ -21,7 +21,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "required",
       null,
-      (value: any) => {
+      (value: T[]) => {
         return {
           isOk: value !== undefined && value !== null && Array.isArray(value),
         };
@@ -52,7 +52,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "min",
       minLength,
-      (value: any, minLength: number) => ({
+      (value: T[], minLength: number) => ({
         isOk: Array.isArray(value) && value.length >= minLength,
       }),
       failedMessage
@@ -66,7 +66,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "max",
       maxLength,
-      (value: any, maxLength: number) => ({
+      (value: T[], maxLength: number) => ({
         isOk: Array.isArray(value) && value.length <= maxLength,
       }),
       failedMessage
@@ -80,7 +80,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "length",
       exactLength,
-      (value: any, exactLength: number) => ({
+      (value: T[], exactLength: number) => ({
         isOk: Array.isArray(value) && value.length === exactLength,
       }),
       failedMessage
@@ -94,7 +94,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "notEmpty",
       null,
-      (value: any) => ({
+      (value: T[]) => ({
         isOk: Array.isArray(value) && value.length > 0,
       }),
       failedMessage ? failedMessage : "Array must not be empty",
@@ -106,7 +106,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "unique",
       null,
-      (value: any) => ({
+      (value: T[]) => ({
         isOk: Array.isArray(value) && value.length === new Set(value).size,
       }),
       failedMessage ? failedMessage : "Array must contain unique items",
@@ -114,11 +114,11 @@ class ArrayZod extends YelixValidationBase {
     return this;
   }
 
-  includes(item: any, failedMessage?: FailedMessage): this {
+  includes(item: T, failedMessage?: FailedMessage): this {
     this.addRule(
       "includes",
       item,
-      (value: any, item: any) => ({
+      (value: T[], item: T) => ({
         isOk: Array.isArray(value) && value.includes(item),
       }),
       failedMessage ? failedMessage : `Array must include ${item}`,
@@ -130,7 +130,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "every",
       validator,
-      (value: any, validator: YelixValidationBase) => {
+      (value: T[], validator: YelixValidationBase) => {
         if (!Array.isArray(value)) {
           return {
             isOk: false,
@@ -169,7 +169,7 @@ class ArrayZod extends YelixValidationBase {
     this.addRule(
       "some",
       validator,
-      (value: any, validator: YelixValidationBase) => {
+      (value: T[], validator: YelixValidationBase) => {
         if (!Array.isArray(value)) return { isOk: false };
 
         const results = value.map((item, index) => {
