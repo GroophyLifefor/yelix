@@ -10,6 +10,7 @@ export class ServerManager {
   private sigintListener: any;
   private servedInformations: { title: string; description: string }[] = [];
   private logger: Logger;
+  private isGracefulShutdown: boolean = false;
 
   constructor(yelix: Yelix, logger: Logger) {
     this.yelix = yelix;
@@ -68,9 +69,19 @@ export class ServerManager {
     Deno.addSignalListener("SIGINT", this.sigintListener);
 
     return new Promise<void>((resolve) => {
+      const handler = async (req: Request) => {
+        if (this.isGracefulShutdown) {
+          return new Response("Service Unavailable - Server is shutting down", {
+            status: 503,
+            headers: { "Connection": "close" },
+          });
+        }
+        return await appFetch(req);
+      };
+
       this.server = Deno.serve(
         { port, onListen: (addr: any) => this.onListen(addr) },
-        appFetch,
+        handler,
       );
       resolve();
     });
@@ -79,6 +90,8 @@ export class ServerManager {
   async kill(forceAfterMs = 3000) {
     if (this.server) {
       try {
+        this.logger.clientLog("Starting graceful server shutdown...");
+        this.isGracefulShutdown = true;
         let timeoutId = 0;
         const timeoutPromise = new Promise<void>((resolve) => {
           timeoutId = setTimeout(() => {
@@ -91,6 +104,7 @@ export class ServerManager {
 
         // Race between normal shutdown and timeout
         await Promise.race([shutdownPromise, timeoutPromise]);
+        this.isGracefulShutdown = false;
         clearTimeout(timeoutId);
 
         Deno.removeSignalListener("SIGINT", this.sigintListener);

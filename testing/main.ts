@@ -16,7 +16,7 @@ export async function main(yelix?: OptionalAppConfigType) {
     yelix ? yelix : {
       environment: "dev",
       serverPort: 3030,
-      watchDirectory: API_Folder,
+      // watchDirectory: API_Folder,
     },
   );
 
@@ -38,7 +38,7 @@ export async function main(yelix?: OptionalAppConfigType) {
     ],
   });
 
-  app.docsManager.YelixOpenAPI?.customValidationDescription("min", (min) => {
+  app.customValidationDescription("min", (min) => {
     return "- Minimum value should be " + min;
   });
 

@@ -14,3 +14,4 @@ export * from "@/src/validation/ObjectZod.ts";
 export * from "@/src/validation/NumberZod.ts";
 export * from "@/src/validation/ArrayZod.ts";
 export * from "@/src/validation/DateZod.ts";
+export * from "@/version.ts";

@@ -5,6 +5,7 @@ import type { Yelix } from "@/src/core/Yelix.ts";
 export class Logger {
   private debug: boolean;
   private yelix: Yelix;
+  private prefix: string = "";
 
   constructor(yelix: Yelix, debug: boolean) {
     this.debug = debug;
@@ -12,7 +13,21 @@ export class Logger {
   }
 
   clientLog(...params: any): void {
+    if (this.prefix !== "") {
+      const firstParam = this.prefix + params[0];
+      const afterParams = params.slice(1);
+      params = [firstParam, ...afterParams];
+    }
+
     yelixClientLog(...params);
+  }
+
+  setPrefix(prefix: string): void {
+    this.prefix = prefix;
+  }
+
+  endPrefix(): void {
+    this.prefix = "";
   }
 
   log(...params: any): void {
