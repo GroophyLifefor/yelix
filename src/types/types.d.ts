@@ -49,13 +49,21 @@ type ParsedEndpoint = {
   openAPI?: OpenAPIYelixDoc;
 };
 
+/**
+ * Represents the configuration settings for the application.
+ *
+ * @property environment - Specifies the application environment. Can be one of "dev", "debug", "prod", or "test".
+ * @property serverPort - The port number on which the server will run.
+ * @property showWelcomeMessage - Indicates whether to display a welcome message on startup.
+ * @property includeDefaultMiddlewares - Determines if default middlewares should be included.
+ * @property serveIndexPage - Specifies whether to serve the index page.
+ */
 type AppConfigType = {
   environment: "dev" | "debug" | "prod" | "test";
   serverPort: number;
   showWelcomeMessage: boolean;
   includeDefaultMiddlewares: boolean;
   serveIndexPage: boolean;
-  watchDirectory: string | undefined;
 };
 
 type OptionalAppConfigType = {

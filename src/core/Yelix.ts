@@ -22,7 +22,6 @@ import { cors } from "hono/cors";
 import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
 import { DocsManager } from "./DocsManager.ts";
-import { debounce } from "@/src/utils/debounce.ts";
 
 const defaultConfig: AppConfigType = {
   environment: "dev",
@@ -30,7 +29,6 @@ const defaultConfig: AppConfigType = {
   showWelcomeMessage: true,
   includeDefaultMiddlewares: true,
   serveIndexPage: true,
-  watchDirectory: undefined,
 };
 
 type ActionMeta = {
@@ -45,8 +43,8 @@ class Yelix {
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
   isFirstServe: boolean = true;
-  docsManager: DocsManager;
 
+  private docsManager: DocsManager;
   private logger: Logger;
   private serverManager: ServerManager;
   private isLoadingEndpoints: boolean = false;
@@ -72,21 +70,12 @@ class Yelix {
       serveIndexPage({ yelix: this, docsManager: this.docsManager });
     }
 
-    if (config.watchDirectory) {
-      this.watch();
-      const afterWatchDir = config.watchDirectory
-        .replace(Deno.cwd(), ".")
-        .replaceAll("\\", "/");
-      this.serverManager.addServedInformation({
-        title: "Watching",
-        description: afterWatchDir,
-      });
-    }
-
     this.serverManager.addServedInformation({
       title: "Environment",
       description: config.environment,
     });
+
+    this.watchHotModuleReload();
   }
 
   // Delegate logging methods to Logger
@@ -212,51 +201,47 @@ class Yelix {
     await this.serverManager.kill(forceAfterMs);
   }
 
-  async watch() {
-    if (typeof this.appConfig.watchDirectory !== "string") {
-      this.throw("watchDirectory is not defined in appConfig");
-      return;
-    }
+  watchHotModuleReload() {
+    addEventListener("hmr", async (e) => {
+      const event = e as unknown as {
+        type: string;
+        detail: { path: string };
+      };
 
-    let _events: Deno.FsEvent[] = [];
-    const log = debounce(() => {
-      const rawEvents = _events;
-      _events = [];
+      const descriptionByEventType = {
+        hmr: "Hot Module Reload - Server will restart.",
+      };
 
-      // remove duplicate events
-      const events = rawEvents.filter((event, index, self) => {
-        return index === self.findIndex((t) => t.paths[0] === event.paths[0]);
-      });
+      const description = descriptionByEventType[
+        event.type as keyof typeof descriptionByEventType
+      ] || "Unknown event type";
 
-      for (const event of events) {
-        const afterWatchDir = event.paths[0].replace(
-          this.appConfig.watchDirectory!, // non-null assertion operator
-          "",
-        );
-        console.log("⊚ [%s] %s", event.kind, afterWatchDir);
-      }
-      this.restartEndpoints();
-    }, 200);
-
-    const watcher = Deno.watchFs(this.appConfig.watchDirectory);
-
-    for await (const event of watcher) {
-      log();
-      _events.push(event);
-    }
+      this.logger.clientLog("╓───────────────────────────────────────────────");
+      this.logger.setPrefix("║ ");
+      this.logger.clientLog(
+        "%c[%s], %s",
+        "color: #007acc;",
+        event.type.toUpperCase(),
+        description,
+      );
+      this.logger.clientLog("Changed Module Path: %s", event.detail.path);
+      await this.restartEndpoints("", "", "");
+      this.logger.endPrefix();
+      this.logger.clientLog("╙───────────────────────────────────────────────");
+    });
   }
 
-  async restartEndpoints() {
+  async restartEndpoints(startPrefix = "╓ ", prefix = "║ ", endPrefix = "╙ ") {
     try {
-      this.logger.clientLog("╓ Restarting server...");
+      this.logger.clientLog(startPrefix + "Restarting server...");
       const startms = performance.now();
 
       // Step 1: Gracefully shutdown the current server
-      this.logger.log("║ Shutting down current server...");
+      this.logger.log(prefix + "Shutting down current server...");
       await this.kill(0);
 
       // Step 2: Reset application state
-      this.logger.log("║ Resetting application state...");
+      this.logger.log(prefix + "Resetting application state...");
       this.app = new Hono();
       this.serverManager = new ServerManager(this, this.logger);
       this.docsManager = new DocsManager(this.app);
@@ -274,7 +259,7 @@ class Yelix {
 
       // Step 5: Replay actions in order
       for (const meta of actions) {
-        this.logger.log(`║ Running ${meta.actionTitle}...`);
+        this.logger.log(prefix + `Running ${meta.actionTitle}...`);
         await meta.actionFn(...meta.actionParams);
       }
 
@@ -283,13 +268,13 @@ class Yelix {
       const serveActionExists = actions.some((a) => a.actionTitle === "serve");
 
       if (!serveActionExists) {
-        this.logger.log("║ Restarting server...");
+        this.logger.log(prefix + "Restarting server...");
         await this.serve();
       }
 
       const endms = performance.now();
       this.logger.clientLog(
-        "╙ Server restarted successfully in",
+        endPrefix + "Server restarted successfully in",
         Math.round(endms - startms),
         "ms (+200ms debounce)",
       );
@@ -305,6 +290,21 @@ class Yelix {
         this.logger.throw("Recovery failed:", recoveryError);
       }
     }
+  }
+
+  customValidationDescription(key: string, fn: (value: any) => string) {
+    if (!this.docsManager.YelixOpenAPI) {
+      this.throw("OpenAPI is not initialized");
+      return;
+    }
+
+    this.actionMetaList.push({
+      actionTitle: "customValidationDescription",
+      actionFn: this.customValidationDescription.bind(this),
+      actionParams: [key, fn],
+    });
+
+    this.docsManager.YelixOpenAPI.customValidationDescription(key, fn);
   }
 }
 
