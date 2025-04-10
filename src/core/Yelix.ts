@@ -22,6 +22,7 @@ import { cors } from "hono/cors";
 import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
 import { DocsManager } from "./DocsManager.ts";
+import { watchHotModuleReload } from "@/src/core/HMR.ts";
 
 const defaultConfig: AppConfigType = {
   environment: "dev",
@@ -75,7 +76,7 @@ class Yelix {
       description: config.environment,
     });
 
-    this.watchHotModuleReload();
+    watchHotModuleReload(this, this.logger);
   }
 
   // Delegate logging methods to Logger
@@ -199,36 +200,6 @@ class Yelix {
 
   async kill(forceAfterMs = 3000) {
     await this.serverManager.kill(forceAfterMs);
-  }
-
-  watchHotModuleReload() {
-    addEventListener("hmr", async (e) => {
-      const event = e as unknown as {
-        type: string;
-        detail: { path: string };
-      };
-
-      const descriptionByEventType = {
-        hmr: "Hot Module Reload - Server will restart.",
-      };
-
-      const description = descriptionByEventType[
-        event.type as keyof typeof descriptionByEventType
-      ] || "Unknown event type";
-
-      this.logger.clientLog("╓───────────────────────────────────────────────");
-      this.logger.setPrefix("║ ");
-      this.logger.clientLog(
-        "%c[%s], %s",
-        "color: #007acc;",
-        event.type.toUpperCase(),
-        description,
-      );
-      this.logger.clientLog("Changed Module Path: %s", event.detail.path);
-      await this.restartEndpoints("", "", "");
-      this.logger.endPrefix();
-      this.logger.clientLog("╙───────────────────────────────────────────────");
-    });
   }
 
   async restartEndpoints(startPrefix = "╓ ", prefix = "║ ", endPrefix = "╙ ") {
