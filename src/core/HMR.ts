@@ -4,11 +4,32 @@ import { parseArgs } from "jsr:@std/cli@1.0.15/parse-args";
 import * as path from "jsr:@std/path@1.0.8";
 
 function watchHotModuleReload(yelix: Yelix, logger: Logger) {
+  const args = parseArgs(Deno.args);
+  const cdir = Deno.cwd();
+  let outputPath: string = args["yelix-static-endpoint-generation-output"] ||
+    args["yelix-sego"] ||
+    path.join(cdir, "endpoints.ts");
+  if (outputPath.startsWith(".")) {
+    outputPath = path.join(cdir, outputPath);
+  }
+  const fileName = path.basename(outputPath);
+
   addEventListener("hmr", async (e) => {
     const event = e as unknown as {
       type: string;
       detail: { path: string };
     };
+
+    logger.clientLog("╓───────────────────────────────────────────────");
+    logger.setPrefix("║ ");
+
+    const isEndpointFile = event.detail.path.endsWith(fileName);
+    if (isEndpointFile) {
+      logger.clientLog("Output file changed, skipping HMR.");
+      logger.endPrefix();
+      logger.clientLog("╙───────────────────────────────────────────────");
+      return;
+    }
 
     await resolveEndpoints();
 
@@ -20,8 +41,6 @@ function watchHotModuleReload(yelix: Yelix, logger: Logger) {
       event.type as keyof typeof descriptionByEventType
     ] || "Unknown event type";
 
-    logger.clientLog("╓───────────────────────────────────────────────");
-    logger.setPrefix("║ ");
     logger.clientLog(
       "%c[%s], %s",
       "color: #007acc;",
@@ -41,14 +60,14 @@ async function resolveEndpoints() {
     args["yelix-seg"];
 
   if (!targetFolder) {
-    console.error("No target folder provided for static endpoints.");
     return;
   }
 
   const cdir = Deno.cwd();
   const mergedPath = path.join(cdir, targetFolder);
   let outputPath: string = args["yelix-static-endpoint-generation-output"] ||
-    args["yelix-sego"] || path.join(cdir, "endpoints.ts");
+    args["yelix-sego"] ||
+    path.join(cdir, "endpoints.ts");
   if (outputPath.startsWith(".")) {
     outputPath = path.join(cdir, outputPath);
   }
@@ -92,10 +111,7 @@ async function generateEndpointsFile(rootPath: string, outputPath: string) {
   });
 
   endpointsContent += "\n];\nexport default endpoints;\n";
-  await Deno.writeTextFile(
-    outputPath,
-    endpointsContent,
-  );
+  await Deno.writeTextFile(outputPath, endpointsContent);
 }
 
 export { watchHotModuleReload };

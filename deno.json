@@ -1,12 +1,12 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.38",
+  "version": "0.1.39",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
     "dev": "deno run --allow-net --allow-read --allow-env --watch-hmr ./testing/main.ts",
-    "dev:watch": "deno run --watch-hmr --allow-net --allow-read --allow-write --allow-env ./testing/main.ts --yelix-static-endpoint-generation ./testing --yelix-static-endpoint-generation-output ./testing/endpoints.ts",
+    "dev:watch": "deno run --watch-hmr --watch-hmr-exclude=\"./testing/endpoints.ts\"   --allow-net --allow-read --allow-write --allow-env ./testing/main.ts --yelix-static-endpoint-generation ./testing --yelix-static-endpoint-generation-output ./testing/endpoints.ts",
     "bump:patch": "deno run --allow-read --allow-write bump_version.ts patch",
     "bump:minor": "deno run --allow-read --allow-write bump_version.ts minor",
     "bump:major": "deno run --allow-read --allow-write bump_version.ts major",

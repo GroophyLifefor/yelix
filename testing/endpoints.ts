@@ -4,6 +4,7 @@ const endpoints = [
   await import("./api/hello.ts"),
   await import("./api/jsonResponse.ts"),
   await import("./api/query.ts"),
+  await import("./api/User/endpoints.ts"),
   await import("./api/User/getUser.ts"),
   await import("./endpoints.ts"),
   await import("./main.ts"),
