@@ -25,7 +25,7 @@ function getHtml({ docsPath }: { docsPath?: string }): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Welcome to Yelix</title>
-  <meta name="description" content="Yelix - A powerful web server library">
+  <meta name="description" content="Yelix - A powerful web server framework">
   <style>
     body {
       margin: 0;
@@ -81,7 +81,7 @@ function getHtml({ docsPath }: { docsPath?: string }): string {
 <body>
   <div class="container">
     <h1>Welcome to Yelix</h1>
-    <p>A powerful web server library</p>
+    <p>A powerful web server framework</p>
     ${
     docsPath
       ? `<p>
