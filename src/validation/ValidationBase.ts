@@ -9,11 +9,11 @@ type ValidationError = {
 type RuleResult = { isOk: boolean; newValue?: any };
 type Rule = (...params: any[]) => RuleResult;
 type FailedMessage = string | ((...params: any[]) => string | string[]);
-type ValidateResult = {
+type ValidateResult<T = any> = {
   isOk: boolean;
-  value: any;
+  value: T;
   errors: ValidationError[];
-  validatorInstance: YelixValidationBase;
+  validatorInstance: AbstractValidationBase<T>;
 };
 
 type ValidationRule = {
@@ -24,14 +24,33 @@ type ValidationRule = {
   isTransformer?: boolean; // Added this flag
 };
 
-type UnknownObject = Record<string, YelixValidationBase>;
+type UnknownObject = Record<string, YelixValidationBase<any>>;
 
 type ValidateConfig = {
   prefix?: string | ((prefix: string) => string);
   key?: string;
 };
 
-class YelixValidationBase {
+abstract class AbstractValidationBase<T = any> {
+  abstract rules: ValidationRule[];
+  abstract type: string;
+  abstract getType: "get" | "getAll";
+
+  protected abstract removeRule(title: string): void;
+  abstract hasRule(title: string): boolean;
+  abstract addRule(
+    title: string,
+    value: any,
+    rule: Rule,
+    failedMessage?: FailedMessage,
+    isTransformer?: boolean,
+    addToFirst?: boolean,
+  ): this;
+  abstract addRules(rules: ValidationRule[]): this;
+  abstract validate(value: any, config?: ValidateConfig): ValidateResult<T>;
+}
+
+class YelixValidationBase<T = any> extends AbstractValidationBase<T> {
   rules: ValidationRule[] = [];
   type: string = "not_set";
   getType: "get" | "getAll" = "get";
@@ -73,7 +92,12 @@ class YelixValidationBase {
     return this;
   }
 
-  validate(value: any, config?: ValidateConfig): ValidateResult {
+  addRules(rules: ValidationRule[]): this {
+    this.rules.push(...rules);
+    return this;
+  }
+
+  validate(value: any, config?: ValidateConfig): ValidateResult<T> {
     const errors: string[] = [];
     let currentValue = value;
 
@@ -139,14 +163,14 @@ class YelixValidationBase {
 
     return {
       isOk: errors.length === 0,
-      value: currentValue,
+      value: currentValue as T,
       errors: errors.map((err) => ({ message: err, key: pref })),
       validatorInstance: this,
     };
   }
 }
 
-export { YelixValidationBase };
+export { AbstractValidationBase, YelixValidationBase };
 export type {
   FailedMessage,
   Rule,

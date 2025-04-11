@@ -7,14 +7,11 @@ import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172
 
 type Ctx = Context;
 
+/** @deprecated ValidationType is deprecated because of type generation should be reactive. */
 type ValidationType = {
-  query?: {
-    [key: string]: YelixValidationBase;
-  };
-  body?: ObjectZod;
-  formData?: {
-    [key: string]: YelixValidationBase;
-  };
+  query?: Record<string, YelixValidationBase>;
+  body?: ObjectZod<any>;
+  formData?: Record<string, YelixValidationBase>;
 };
 
 type EndpointHandler = (ctx: Ctx) => Promise<any> | any;

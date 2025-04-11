@@ -5,7 +5,7 @@ import {
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
 
-class AnyZod extends YelixValidationBase {
+class AnyZod extends YelixValidationBase<any> {
   input: YelixInput;
   override type: string = "any";
 
