@@ -17,7 +17,7 @@ type DateConfig = {
   defaultTimezone?: string;
 };
 
-class DateZod extends YelixValidationBase {
+class DateZod extends YelixValidationBase<Date> {
   input: YelixInput;
   override type: string = "date";
   private config: DateConfig;

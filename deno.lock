@@ -4,6 +4,8 @@
     "jsr:@std/assert@1": "1.0.11",
     "jsr:@std/assert@^1.0.10": "1.0.11",
     "jsr:@std/assert@^1.0.11": "1.0.11",
+    "jsr:@std/cli@*": "1.0.15",
+    "jsr:@std/cli@1.0.15": "1.0.15",
     "jsr:@std/expect@*": "1.0.13",
     "jsr:@std/fs@^1.0.13": "1.0.13",
     "jsr:@std/internal@^1.0.5": "1.0.5",
@@ -31,6 +33,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/cli@1.0.15": {
+      "integrity": "e79ba3272ec710ca44d8342a7688e6288b0b88802703f3264184b52893d5e93f"
     },
     "@std/expect@1.0.13": {
       "integrity": "d8e236c7089cd9fcf5e6032f27dadc3db6349d0aee48c15bc71d717bca5baa42",

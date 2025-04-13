@@ -5,7 +5,7 @@ import {
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
 
-class BooleanZod extends YelixValidationBase {
+class BooleanZod extends YelixValidationBase<boolean> {
   input: YelixInput;
   override type: string = "boolean";
 

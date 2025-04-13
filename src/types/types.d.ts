@@ -7,14 +7,11 @@ import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172
 
 type Ctx = Context;
 
+/** @deprecated ValidationType is deprecated because of type generation should be reactive. */
 type ValidationType = {
-  query?: {
-    [key: string]: YelixValidationBase;
-  };
-  body?: ObjectZod;
-  formData?: {
-    [key: string]: YelixValidationBase;
-  };
+  query?: Record<string, YelixValidationBase>;
+  body?: ObjectZod<any>;
+  formData?: Record<string, YelixValidationBase>;
 };
 
 type EndpointHandler = (ctx: Ctx) => Promise<any> | any;
@@ -49,13 +46,21 @@ type ParsedEndpoint = {
   openAPI?: OpenAPIYelixDoc;
 };
 
+/**
+ * Represents the configuration settings for the application.
+ *
+ * @property environment - Specifies the application environment. Can be one of "dev", "debug", "prod", or "test".
+ * @property serverPort - The port number on which the server will run.
+ * @property showWelcomeMessage - Indicates whether to display a welcome message on startup.
+ * @property includeDefaultMiddlewares - Determines if default middlewares should be included.
+ * @property serveIndexPage - Specifies whether to serve the index page.
+ */
 type AppConfigType = {
   environment: "dev" | "debug" | "prod" | "test";
   serverPort: number;
   showWelcomeMessage: boolean;
   includeDefaultMiddlewares: boolean;
   serveIndexPage: boolean;
-  watchDirectory: string | undefined;
 };
 
 type OptionalAppConfigType = {

@@ -5,7 +5,7 @@ import {
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
 
-class FileZod extends YelixValidationBase {
+class FileZod<T = File> extends YelixValidationBase<T> {
   input: YelixInput;
   override type: string = "file";
 
@@ -58,9 +58,12 @@ class FileZod extends YelixValidationBase {
     return this;
   }
 
-  multipleFiles(): this {
-    this.getType = "getAll";
-    return this;
+  multipleFiles(): FileZod<File[]> {
+    const rules = this.rules;
+    const newFileZod = new FileZod<File[]>(this.input);
+    newFileZod.addRules(rules);
+    newFileZod.getType = "getAll";
+    return newFileZod;
   }
 
   minFilesCount(count: number, failedMessage?: FailedMessage): this {
@@ -115,7 +118,8 @@ class FileZod extends YelixValidationBase {
         const files = Array.isArray(value) ? value : [value];
         for (const file of files) {
           if (
-            !this.isValidTypeCheck(file) || !file ||
+            !this.isValidTypeCheck(file) ||
+            !file ||
             typeof file.size !== "number"
           ) {
             return {
