@@ -2,7 +2,7 @@
 import type { Context } from "hono";
 import type { H } from "hono/types";
 import type { ObjectZod, Yelix, YelixValidationBase } from "@/mod.ts";
-import type { OpenAPIYelixDoc } from "../OpenAPI/Core/index.ts";
+import type { OpenAPIYelixDoc } from "@/src/OpenAPI/Core/index.ts";
 import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
 
 type Ctx = Context;
