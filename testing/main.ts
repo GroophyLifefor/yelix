@@ -19,7 +19,7 @@ export async function main(yelix?: OptionalAppConfigType) {
   const app = new Yelix(
     yelix ? yelix : {
       environment: "dev",
-      serverPort: 3030
+      serverPort: 3030,
     },
   );
 

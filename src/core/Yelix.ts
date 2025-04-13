@@ -22,8 +22,8 @@ import { cors } from "hono/cors";
 import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
 import { DocsManager } from "../OpenAPI/DocsManager.ts";
-import { debounce } from "@/src/utils/debounce.ts";
 import type { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
+import { watchHotModuleReload } from "@/src/core/HMR.ts";
 
 const defaultConfig: AppConfigType = {
   environment: "dev",
@@ -285,7 +285,7 @@ class Yelix {
       actionParams: [key, fn],
     });
 
-    this.docsManager.YelixOpenAPI.customValidationDescription(key, fn);
+    this.docsManager.YelixOpenAPI.describeValidationRule(key, fn);
   }
 }
 
