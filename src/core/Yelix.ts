@@ -21,7 +21,7 @@ import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 import { cors } from "hono/cors";
 import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
-import { DocsManager } from "../OpenAPI/DocsManager.ts";
+import { DocsManager } from "@/src/OpenAPI/DocsManager.ts";
 import type { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
 import { watchHotModuleReload } from "@/src/core/HMR.ts";
 
