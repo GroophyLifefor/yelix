@@ -6,9 +6,9 @@ export const cache = new YelixCache<string>();
 // API endpoint handler
 export async function POST(ctx: Ctx) {
   const requestData = ctx.get("dataValidation").user;
-  const query = requestData.body;
+  const body = requestData.body;
 
-  const data = "Hello, " + query.name;
+  const data = "Hello, " + body.name;
   return await ctx.json({
     isOk: true,
     message: data,

@@ -3,8 +3,10 @@ export * from "./src/api/middlewares/requestValidationYelix.ts";
 export * from "@/src/api/middlewares/simpleLogger.ts";
 export * from "@/src/core/Yelix.ts";
 export * from "@/src/utils/cache.ts";
-export * from "@/src/OpenAPI/index.ts";
 export * from "@/src/test/testClient.ts";
+
+export * from "@/src/OpenAPI/Core/index.ts";
+export * from "@/src/OpenAPI/APIReferences/index.ts";
 
 export * from "@/src/validation/inp.ts";
 export * from "@/src/validation/ValidationBase.ts";

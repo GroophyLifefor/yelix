@@ -21,7 +21,8 @@ import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 import { cors } from "hono/cors";
 import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
-import { DocsManager } from "./DocsManager.ts";
+import { DocsManager } from "@/src/OpenAPI/DocsManager.ts";
+import type { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
 import { watchHotModuleReload } from "@/src/core/HMR.ts";
 
 const defaultConfig: AppConfigType = {
@@ -57,7 +58,7 @@ class Yelix {
     this.app = new Hono();
     this.logger = new Logger(this, config.environment === "debug");
     this.serverManager = new ServerManager(this, this.logger);
-    this.docsManager = new DocsManager(this.app);
+    this.docsManager = new DocsManager(this, this.serverManager);
 
     if (config.showWelcomeMessage == true && config.environment !== "test") {
       sayWelcome();
@@ -141,15 +142,24 @@ class Yelix {
     this.isLoadingEndpoints = false;
   }
 
-  initOpenAPI(config: InitOpenAPIParams) {
+  initOpenAPI(config: InitOpenAPIParams): void {
     this.actionMetaList.push({
       actionTitle: "initOpenAPI",
       actionFn: this.initOpenAPI.bind(this),
       actionParams: [config],
     });
 
-    const info = this.docsManager.initOpenAPI(config);
-    this.serverManager.addServedInformation(info);
+    this.docsManager.initOpenAPI(config);
+  }
+
+  serveAPIReference(APIReference: APIReferenceBase) {
+    this.actionMetaList.push({
+      actionTitle: "serveAPIReference",
+      actionFn: this.serveAPIReference.bind(this),
+      actionParams: [APIReference],
+    });
+
+    this.docsManager.serveAPIReference(APIReference);
   }
 
   cors(opt: CORSParams) {
@@ -215,7 +225,7 @@ class Yelix {
       this.logger.log(prefix + "Resetting application state...");
       this.app = new Hono();
       this.serverManager = new ServerManager(this, this.logger);
-      this.docsManager = new DocsManager(this.app);
+      this.docsManager = new DocsManager(this, this.serverManager);
       this.middlewares = [];
       this.endpointList = [];
 
@@ -275,7 +285,7 @@ class Yelix {
       actionParams: [key, fn],
     });
 
-    this.docsManager.YelixOpenAPI.customValidationDescription(key, fn);
+    this.docsManager.YelixOpenAPI.describeValidationRule(key, fn);
   }
 }
 

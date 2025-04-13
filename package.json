@@ -1,2 +1,5 @@
 {
+  "dependencies": {
+    "@hono/swagger-ui": "^0.5.1"
+  }
 }

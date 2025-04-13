@@ -3,7 +3,11 @@ import {
   type Endpoint,
   type Middleware,
   type OptionalAppConfigType,
+  RedocReference,
   requestDataValidationYelixMiddleware,
+  ScalarReference,
+  StoplightReference,
+  SwaggerReference,
   Yelix,
 } from "@/mod.ts";
 import * as path from "jsr:@std/path@1.0.8";
@@ -16,14 +20,12 @@ export async function main(yelix?: OptionalAppConfigType) {
     yelix ? yelix : {
       environment: "dev",
       serverPort: 3030,
-      // watchDirectory: API_Folder,
     },
   );
 
   await app.loadEndpointsFromFolder(API_Folder);
 
   app.initOpenAPI({
-    path: "/docs",
     title: "Yelix Testing API",
     description: "This is a testing API for Yelix",
     servers: [
@@ -38,7 +40,12 @@ export async function main(yelix?: OptionalAppConfigType) {
     ],
   });
 
-  app.customValidationDescription("min", (min) => {
+  app.serveAPIReference(new RedocReference());
+  app.serveAPIReference(new ScalarReference());
+  app.serveAPIReference(new SwaggerReference());
+  app.serveAPIReference(new StoplightReference());
+
+  app.docsManager.describeValidationRule("min", (min) => {
     return "- Minimum value should be " + min;
   });
 
