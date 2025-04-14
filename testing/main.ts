@@ -31,7 +31,7 @@ export async function main(yelix?: OptionalAppConfigType) {
     servers: [
       {
         url: "http://localhost:3030",
-        description: "Local Server _asd_ *askjads* **asdasda**",
+        description: "Local Server for development and testing purposes",
       },
       {
         url: "http://localhost:3080",
@@ -45,7 +45,7 @@ export async function main(yelix?: OptionalAppConfigType) {
   app.serveAPIReference(new SwaggerReference());
   app.serveAPIReference(new StoplightReference());
 
-  app.docsManager.describeValidationRule("min", (min) => {
+  app.describeValidationRule("min", (min) => {
     return "- Minimum value should be " + min;
   });
 

@@ -1,6 +1,4 @@
 // deno-lint-ignore-file no-explicit-any
-import { yelixClientLog } from "@/src/utils/logging.ts";
-import type { Logger } from "./Logger.ts";
 import version from "@/version.ts";
 import type { Yelix } from "@/src/core/Yelix.ts";
 
@@ -9,12 +7,10 @@ export class ServerManager {
   private server: any;
   private sigintListener: any;
   private servedInformations: { title: string; description: string }[] = [];
-  private logger: Logger;
   private isGracefulShutdown: boolean = false;
 
-  constructor(yelix: Yelix, logger: Logger) {
+  constructor(yelix: Yelix) {
     this.yelix = yelix;
-    this.logger = logger;
   }
 
   private addLocalInformationToInitiate(addr: any) {
@@ -37,21 +33,21 @@ export class ServerManager {
     const packageVersion = version;
 
     if (this.yelix.isFirstServe) {
-      this.logger.clientLog();
-      this.logger.clientLog(
+      this.yelix.logger.info();
+      this.yelix.logger.info([
         "  %c 𝕐 Yelix %c" + packageVersion,
         "color: orange;",
         "color: inherit",
-      );
-      const maxLength = Math.max(
-        ...this.servedInformations.map((i) => i.title.length),
-      ) + 1;
+      ]);
+      const maxLength = Math.max(...this.servedInformations.map((i) =>
+        i.title.length
+      )) + 1;
       this.servedInformations.forEach((info) => {
-        this.logger.clientLog(
+        this.yelix.logger.info(
           `   - ${info.title.padEnd(maxLength)}:  ${info.description}`,
         );
       });
-      this.logger.clientLog();
+      this.yelix.logger.info();
     }
   }
 
@@ -61,7 +57,7 @@ export class ServerManager {
 
   startServer(port: number, appFetch: any): Promise<void> {
     this.sigintListener = () => {
-      yelixClientLog("interrupted!");
+      this.yelix.logger.info("interrupted!");
       this.kill();
       Deno.exit();
     };
@@ -73,7 +69,7 @@ export class ServerManager {
         if (this.isGracefulShutdown) {
           return new Response("Service Unavailable - Server is shutting down", {
             status: 503,
-            headers: { "Connection": "close" },
+            headers: { Connection: "close" },
           });
         }
         return await appFetch(req);
@@ -90,12 +86,12 @@ export class ServerManager {
   async kill(forceAfterMs = 3000) {
     if (this.server) {
       try {
-        this.logger.clientLog("Starting graceful server shutdown...");
+        this.yelix.logger.info("Starting graceful server shutdown...");
         this.isGracefulShutdown = true;
         let timeoutId = 0;
         const timeoutPromise = new Promise<void>((resolve) => {
           timeoutId = setTimeout(() => {
-            this.logger.warn("Server shutdown timed out, forcing close");
+            this.yelix.logger.warn("Server shutdown timed out, forcing close");
             resolve();
           }, forceAfterMs);
         });
@@ -112,12 +108,12 @@ export class ServerManager {
         // Clear the reference to prevent any lingering issues
         this.server = null;
       } catch (error) {
-        this.logger.warn("Error during server shutdown:", error);
+        this.yelix.logger.warn(["Error during server shutdown:", error]);
         Deno.removeSignalListener("SIGINT", this.sigintListener);
         this.server = null;
       }
     } else {
-      yelixClientLog(
+      this.yelix.logger.info(
         "You tried to kill the server but it was not running. This is fine.",
       );
     }

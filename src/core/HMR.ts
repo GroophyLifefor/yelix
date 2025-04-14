@@ -1,17 +1,12 @@
-import type { Logger } from "@/src/core/Logger.ts";
 import type { Yelix } from "@/mod.ts";
 import { parseArgs } from "jsr:@std/cli@1.0.15/parse-args";
 import * as path from "jsr:@std/path@1.0.8";
 
-function watchHotModuleReload(yelix: Yelix, logger: Logger) {
-  const args = parseArgs(Deno.args);
-  const cdir = Deno.cwd();
-  let outputPath: string = args["yelix-static-endpoint-generation-output"] ||
-    args["yelix-sego"] ||
-    path.join(cdir, "endpoints.ts");
-  if (outputPath.startsWith(".")) {
-    outputPath = path.join(cdir, outputPath);
-  }
+const CACHED_ARGS = parseArgs(Deno.args);
+const CDIR = Deno.cwd();
+
+function watchHotModuleReload(yelix: Yelix) {
+  const outputPath = getOutputPath();
   const fileName = path.basename(outputPath);
 
   addEventListener("hmr", async (e) => {
@@ -20,57 +15,62 @@ function watchHotModuleReload(yelix: Yelix, logger: Logger) {
       detail: { path: string };
     };
 
-    logger.clientLog("╓───────────────────────────────────────────────");
-    logger.setPrefix("║ ");
+    yelix.logger.info("╓───────────────────────────────────────────────");
+    yelix.logger.startPrefix("║ ");
 
     const isEndpointFile = event.detail.path.endsWith(fileName);
     if (isEndpointFile) {
-      logger.clientLog("Output file changed, skipping HMR.");
-      logger.endPrefix();
-      logger.clientLog("╙───────────────────────────────────────────────");
+      yelix.logger.info("Output file changed, skipping HMR.");
+      yelix.logger.endPrefix();
+      yelix.logger.info("╙───────────────────────────────────────────────");
       return;
     }
 
     await resolveEndpoints();
 
-    const descriptionByEventType = {
+    const descriptions = {
       hmr: "Hot Module Reload - Server will restart.",
     };
 
-    const description = descriptionByEventType[
-      event.type as keyof typeof descriptionByEventType
-    ] || "Unknown event type";
+    const description = descriptions[event.type as keyof typeof descriptions] ||
+      "Unknown event type";
 
-    logger.clientLog(
+    yelix.logger.info([
       "%c[%s], %s",
       "color: #007acc;",
       event.type.toUpperCase(),
       description,
-    );
-    logger.clientLog("Changed Module Path: %s", event.detail.path);
+    ]);
+    yelix.logger.info(["Changed Module Path: %s", event.detail.path]);
     await yelix.restartEndpoints("", "", "");
-    logger.endPrefix();
-    logger.clientLog("╙───────────────────────────────────────────────");
+    yelix.logger.endPrefix();
+    yelix.logger.info("╙───────────────────────────────────────────────");
   });
 }
 
+function getOutputPath(): string {
+  let outputPath: string =
+    CACHED_ARGS["yelix-static-endpoint-generation-output"] ||
+    CACHED_ARGS["yelix-sego"] ||
+    path.join(CDIR, "endpoints.ts");
+
+  if (outputPath.startsWith(".")) {
+    outputPath = path.join(CDIR, outputPath);
+  }
+
+  return outputPath;
+}
+
 async function resolveEndpoints() {
-  const args = parseArgs(Deno.args);
-  const targetFolder = args["yelix-static-endpoint-generation"] ||
-    args["yelix-seg"];
+  const targetFolder = CACHED_ARGS["yelix-static-endpoint-generation"] ||
+    CACHED_ARGS["yelix-seg"];
 
   if (!targetFolder) {
     return;
   }
 
-  const cdir = Deno.cwd();
-  const mergedPath = path.join(cdir, targetFolder);
-  let outputPath: string = args["yelix-static-endpoint-generation-output"] ||
-    args["yelix-sego"] ||
-    path.join(cdir, "endpoints.ts");
-  if (outputPath.startsWith(".")) {
-    outputPath = path.join(cdir, outputPath);
-  }
+  const mergedPath = path.join(CDIR, targetFolder);
+  const outputPath = getOutputPath();
 
   await generateEndpointsFile(mergedPath, outputPath);
 }
@@ -98,19 +98,21 @@ function generateImportStatement(filePath: string, basePath: string): string {
 
 async function generateEndpointsFile(rootPath: string, outputPath: string) {
   const folderPathOfOutput = path.dirname(outputPath);
-  let endpointsContent = "const endpoints = [\n";
+  const importStatements: string[] = [];
 
   await walkDirectory(rootPath, (file) => {
     const extension = path.extname(file.path);
     if (file.fileInfo.isFile && (extension === ".ts" || extension === ".js")) {
-      endpointsContent += generateImportStatement(
-        file.path,
-        folderPathOfOutput,
+      importStatements.push(
+        generateImportStatement(file.path, folderPathOfOutput),
       );
     }
   });
 
-  endpointsContent += "\n];\nexport default endpoints;\n";
+  const endpointsContent = "const endpoints = [\n" +
+    importStatements.join("") +
+    "\n];\nexport default endpoints;\n";
+
   await Deno.writeTextFile(outputPath, endpointsContent);
 }
 

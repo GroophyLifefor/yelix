@@ -16,14 +16,15 @@ import type {
   ParsedEndpoint,
 } from "@/src/types/types.d.ts";
 import { sayWelcome } from "@/src/utils/welcome.ts";
-import { simpleLoggerMiddeware } from "@/src/api/middlewares/simpleLogger.ts";
+import { simpleLoggerMiddleware } from "@/src/api/middlewares/simpleLogger.ts";
 import { serveIndexPage } from "@/src/api/indexPage/getHtml.ts";
 import { cors } from "hono/cors";
-import { Logger } from "./Logger.ts";
 import { ServerManager } from "./ServerManager.ts";
-import { DocsManager } from "@/src/OpenAPI/DocsManager.ts";
 import type { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
 import { watchHotModuleReload } from "@/src/core/HMR.ts";
+import { DocsManager } from "@/src/OpenAPI/DocsManager.ts";
+import type { ILogger } from "@/src/Logger/CoreLogger.ts";
+import { LoggerFactory } from "@/src/Logger/LoggerFactory.ts";
 
 const defaultConfig: AppConfigType = {
   environment: "dev",
@@ -45,9 +46,9 @@ class Yelix {
   middlewares: MiddlewareList[] = [];
   appConfig: AppConfigType = defaultConfig;
   isFirstServe: boolean = true;
+  logger: ILogger;
 
   private docsManager: DocsManager;
-  private logger: Logger;
   private serverManager: ServerManager;
   private isLoadingEndpoints: boolean = false;
   private actionMetaList: ActionMeta[] = [];
@@ -56,8 +57,8 @@ class Yelix {
     const config = { ...defaultConfig, ...appConfig };
     this.appConfig = config;
     this.app = new Hono();
-    this.logger = new Logger(this, config.environment === "debug");
-    this.serverManager = new ServerManager(this, this.logger);
+    this.logger = LoggerFactory.createLogger(config.environment);
+    this.serverManager = new ServerManager(this);
     this.docsManager = new DocsManager(this, this.serverManager);
 
     if (config.showWelcomeMessage == true && config.environment !== "test") {
@@ -65,7 +66,7 @@ class Yelix {
     }
 
     if (config.includeDefaultMiddlewares) {
-      this.setMiddleware("*", simpleLoggerMiddeware);
+      this.setMiddleware("*", simpleLoggerMiddleware);
     }
 
     if (config.serveIndexPage) {
@@ -77,24 +78,7 @@ class Yelix {
       description: config.environment,
     });
 
-    watchHotModuleReload(this, this.logger);
-  }
-
-  // Delegate logging methods to Logger
-  clientLog(...params: any): void {
-    this.logger.clientLog(...params);
-  }
-
-  log(...params: any): void {
-    this.logger.log(...params);
-  }
-
-  warn(...params: any): void {
-    this.logger.warn(...params);
-  }
-
-  throw(...params: any): void {
-    this.logger.throw(...params);
+    watchHotModuleReload(this);
   }
 
   setMiddleware(name: string | RegExp, middleware: Middleware) {
@@ -124,7 +108,10 @@ class Yelix {
     const isDenoDeploy = Deno.env.get("DENO_DEPLOYMENT_ID") !== undefined;
 
     if (isDenoDeploy) {
-      this.throw("Deno Deploy does not support dynamic imports");
+      const errMessage =
+        "Deno Deploy does not support dynamic imports, Look Yelix's Static Endpoint Generation(SEG) feature.";
+      this.logger.fatal(errMessage);
+      throw new Error(errMessage);
     }
 
     this.isLoadingEndpoints = true;
@@ -190,7 +177,7 @@ class Yelix {
     });
 
     if (this.isLoadingEndpoints) {
-      this.warn(
+      this.logger.warn(
         "Endpoints are still loading, you may not await the loadEndpointsFromFolder method",
       );
     }
@@ -214,17 +201,17 @@ class Yelix {
 
   async restartEndpoints(startPrefix = "╓ ", prefix = "║ ", endPrefix = "╙ ") {
     try {
-      this.logger.clientLog(startPrefix + "Restarting server...");
+      this.logger.info(startPrefix + "Restarting server...");
       const startms = performance.now();
 
       // Step 1: Gracefully shutdown the current server
-      this.logger.log(prefix + "Shutting down current server...");
+      this.logger.debug(prefix + "Shutting down current server...");
       await this.kill(0);
 
       // Step 2: Reset application state
-      this.logger.log(prefix + "Resetting application state...");
+      this.logger.debug(prefix + "Resetting application state...");
       this.app = new Hono();
-      this.serverManager = new ServerManager(this, this.logger);
+      this.serverManager = new ServerManager(this);
       this.docsManager = new DocsManager(this, this.serverManager);
       this.middlewares = [];
       this.endpointList = [];
@@ -240,7 +227,7 @@ class Yelix {
 
       // Step 5: Replay actions in order
       for (const meta of actions) {
-        this.logger.log(prefix + `Running ${meta.actionTitle}...`);
+        this.logger.debug(prefix + `Running ${meta.actionTitle}...`);
         await meta.actionFn(...meta.actionParams);
       }
 
@@ -249,39 +236,39 @@ class Yelix {
       const serveActionExists = actions.some((a) => a.actionTitle === "serve");
 
       if (!serveActionExists) {
-        this.logger.log(prefix + "Restarting server...");
+        this.logger.debug(prefix + "Restarting server...");
         await this.serve();
       }
 
       const endms = performance.now();
-      this.logger.clientLog(
+      this.logger.info([
         endPrefix + "Server restarted successfully in",
         Math.round(endms - startms),
         "ms (+200ms debounce)",
-      );
+      ]);
     } catch (error) {
-      this.logger.throw("Error during server restart:", error);
+      this.logger.fatal("Error during server restart:", { error });
 
       // Attempt recovery
-      this.logger.clientLog("Attempting recovery...");
+      this.logger.info("Attempting recovery...");
       try {
         await this.serve();
-        this.logger.clientLog("Recovery successful");
+        this.logger.info("Recovery successful");
       } catch (recoveryError) {
-        this.logger.throw("Recovery failed:", recoveryError);
+        this.logger.fatal("Recovery failed:", { error: recoveryError });
       }
     }
   }
 
-  customValidationDescription(key: string, fn: (value: any) => string) {
+  describeValidationRule(key: string, fn: (value: any) => string) {
     if (!this.docsManager.YelixOpenAPI) {
-      this.throw("OpenAPI is not initialized");
+      this.logger.fatal("OpenAPI is not initialized");
       return;
     }
 
     this.actionMetaList.push({
-      actionTitle: "customValidationDescription",
-      actionFn: this.customValidationDescription.bind(this),
+      actionTitle: "describeValidationRule",
+      actionFn: this.describeValidationRule.bind(this),
       actionParams: [key, fn],
     });
 
