@@ -1,11 +1,13 @@
 import { BaseLogger } from "@/src/Logger/BaseLogger.ts";
-import { LogLevel } from "@/src/Logger/CoreLogger.ts";
+import type { LogLevel, LogMessage } from "@/src/Logger/CoreLogger.ts";
 
 class YelixLogger extends BaseLogger {
-  log(level: LogLevel, message: string, meta?: object): void {
-    const timestamp = new Date().toISOString();
-    const metaString = meta ? JSON.stringify(meta) : "";
-    console.log(`[${timestamp}] [${LogLevel[level]}] ${message} ${metaString}`);
+  log(_level: LogLevel, message: LogMessage, _meta?: object): void {
+    if (Array.isArray(message)) {
+      console.log(...message);
+    } else {
+      console.log(message);
+    }
   }
 }
 
