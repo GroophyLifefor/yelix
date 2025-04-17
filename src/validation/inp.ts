@@ -76,14 +76,14 @@ class YelixInput {
   }
 
   array<T>(
-    validator?: YelixValidationBase,
+    validator?: YelixValidationBase<T>,
   ): ArrayZod<T | Infer<typeof validator>> {
     if (this._zod) {
       throw new Error("Input type already set.");
     }
 
     if (validator) {
-      const v = new ArrayZod<Infer<typeof validator>>(this);
+      const v = new ArrayZod<Infer<typeof validator>>(this, validator);
       this._zod = v;
       return v;
     }

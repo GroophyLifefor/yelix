@@ -2,7 +2,7 @@
 import type { Context } from "hono";
 import type { H } from "hono/types";
 import type { ObjectZod, Yelix, YelixValidationBase } from "@/mod.ts";
-import type { OpenAPIYelixDoc } from "@/src/OpenAPI/Core/index.ts";
+import type { OpenAPIDoc } from "@/src/OpenAPI/Core/index.ts";
 import type { ApiReferenceOptions } from "npm:@scalar/hono-api-reference@0.5.172";
 
 type Ctx = Context;
@@ -24,8 +24,8 @@ type Endpoint = {
   DELETE?: EndpointHandler;
   PATCH?: EndpointHandler;
   middlewares?: string[];
-  validation?: ValidationType;
-  openAPI?: OpenAPIYelixDoc | undefined;
+  validation?: unknown;
+  openAPI?: OpenAPIDoc | undefined;
 };
 
 type ApplyMiddlewareParams = {
@@ -43,8 +43,10 @@ type ParsedEndpoint = {
   path: string;
   methods: ParsedMethod[];
   exports: ExportsType;
-  openAPI?: OpenAPIYelixDoc;
+  openAPI?: OpenAPIDoc;
 };
+
+type EnvironmentType = "dev" | "debug" | "prod" | "test";
 
 /**
  * Represents the configuration settings for the application.
@@ -56,7 +58,7 @@ type ParsedEndpoint = {
  * @property serveIndexPage - Specifies whether to serve the index page.
  */
 type AppConfigType = {
-  environment: "dev" | "debug" | "prod" | "test";
+  environment: EnvironmentType;
   serverPort: number;
   showWelcomeMessage: boolean;
   includeDefaultMiddlewares: boolean;
@@ -117,6 +119,7 @@ export type {
   Ctx,
   Endpoint,
   EndpointHandler,
+  EnvironmentType,
   ExportsType,
   InitOpenAPIParams,
   Middleware,

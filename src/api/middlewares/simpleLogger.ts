@@ -1,6 +1,6 @@
 import type { Middleware } from "@/mod.ts";
 
-const simpleLoggerMiddeware: Middleware = async (request, next, yelix) => {
+const simpleLoggerMiddleware: Middleware = async (request, next, yelix) => {
   const startms = performance.now();
   await next();
   const endms = performance.now();
@@ -41,13 +41,13 @@ const simpleLoggerMiddeware: Middleware = async (request, next, yelix) => {
     cacheColorize = "color: gray;";
   }
 
-  yelix.clientLog(
+  yelix.logger.info([
     `${method} %c ${cacheText} %c ${pathname} %c${status}%c in ${durationFixed}${durationUnit}`,
     cacheColorize,
     "",
     `color: ${colorsByStatus(status)};`,
     "color: white;",
-  );
+  ]);
 };
 
-export { simpleLoggerMiddeware };
+export { simpleLoggerMiddleware };

@@ -54,6 +54,17 @@ class YelixValidationBase<T = any> extends AbstractValidationBase<T> {
   rules: ValidationRule[] = [];
   type: string = "not_set";
   getType: "get" | "getAll" = "get";
+  meta: Record<string, any> = {};
+
+  setExampleInput<T>(data: T): this {
+    this.meta.exampleInput = data;
+    return this;
+  }
+
+  setExampleOutput<T>(data: T): this {
+    this.meta.exampleOutput = data;
+    return this;
+  }
 
   protected removeRule(title: string) {
     this.rules = this.rules.filter((r) => r.title !== title);
