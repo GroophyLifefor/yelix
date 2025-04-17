@@ -192,14 +192,15 @@ class YelixOpenAPI {
       schema.type = 'string';
     } else if (type === 'array') {
       schema.type = 'array';
-      // Add items property for arrays
-      const arrayTypeRule = yelixSchema.rules.find(
-        (r) => r.title === 'arrayType'
-      );
-      if (arrayTypeRule?.value) {
-        schema.items = this.yelixZodToJsonSchema(arrayTypeRule.value);
+      const arrayTypeRule = (yelixSchema as ArrayZod<any>).itemsType;
+      if (arrayTypeRule) {
+        schema.items = {
+          type: this.getType(arrayTypeRule),
+        };
       } else {
-        schema.items = { type: 'string' }; // Default to string if not specified
+        schema.items = {
+          type: 'string',
+        };
       }
     } else if (type === 'object') {
       schema.type = 'object';
