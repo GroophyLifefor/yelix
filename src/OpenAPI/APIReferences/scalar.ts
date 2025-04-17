@@ -1,9 +1,5 @@
-import {
-  apiReference,
-  type ApiReferenceOptions,
-} from "npm:@scalar/hono-api-reference@0.5.172";
 import { APIReferenceBase } from "@/src/OpenAPI/APIReferences/base.ts";
-import type { Ctx } from "@/mod.ts";
+import type { ApiReferenceOptions, Ctx } from "@/mod.ts";
 
 export class ScalarReference extends APIReferenceBase {
   override referenceTitle = "Scalar";
@@ -25,31 +21,42 @@ export class ScalarReference extends APIReferenceBase {
     this.config = apiReferenceConfig;
   }
 
-  override async getResponse(ctx: Ctx): Promise<Response> {
+  override getResponse(ctx: Ctx): Response | Promise<Response> {
+    const pageTitle = this.referenceTitle + " | Yelix API Docs";
     const spec = "/yelix-openapi-raw";
-    const html = await getScalarHTML(spec, this.config);
-    return (await html(
-      ctx,
-      // deno-lint-ignore require-await
-      async () => Promise.resolve(),
-      // deno-lint-ignore no-explicit-any
-    )) as any;
+    const html = getScalarHTML(pageTitle, spec, this.config || {});
+    return ctx.html(html, 200);
   }
 }
 
-async function getScalarHTML(
+function getScalarHTML(
+  pageTitle: string,
   spec: string,
   config?: ApiReferenceOptions,
 ) {
-  const pageTitle = "Scalar | Yelix API Reference";
-  const defaultConfig = {
-    theme: "saturn",
-    favicon: "https://docs.yelix.dev/img/scalar-logo.png",
-    pageTitle,
-  };
-  const apiReferenceConfig = Object.assign(defaultConfig, config);
+  return `<!doctype html>
+<html>
+  <head>
+    <title>${pageTitle}</title>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1" />
+  </head>
+  <body>
+    <script
+      id="api-reference"
+      data-url="${spec}"></script>
 
-  apiReferenceConfig.spec = { url: spec };
+    <!-- Optional: You can set a full configuration object like this: -->
+    <script>
+      var configuration = ${JSON.stringify(config)};
 
-  return await apiReference(apiReferenceConfig);
+      document.getElementById('api-reference').dataset.configuration =
+        JSON.stringify(configuration)
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/@scalar/api-reference"></script>
+  </body>
+</html>`;
 }
