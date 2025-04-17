@@ -57,7 +57,7 @@ abstract class BaseLogger implements ILogger {
     meta?: object,
   ): void {
     const isWillingToLog = this.logLevel <= logLevel;
-    let logMessage: LogMessage = '';
+    let logMessage: LogMessage = "";
     if (Array.isArray(message)) {
       logMessage = message;
       logMessage[0] = `${this.prefix}${message[0]}`;

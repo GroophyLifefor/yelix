@@ -10,7 +10,7 @@ import { BooleanZod } from "@/src/validation/BooleanZod.ts";
 class ArrayZod<T> extends YelixValidationBase<T[]> {
   input: YelixInput;
   override type: string = "array";
-  itemsType: string = 'any';
+  itemsType: string = "any";
   validator: YelixValidationBase<T> | null = null;
 
   constructor(_input: YelixInput, validator?: YelixValidationBase<T>) {
@@ -18,13 +18,13 @@ class ArrayZod<T> extends YelixValidationBase<T[]> {
     this.input = _input;
 
     if (validator) {
-      if (validator instanceof StringZod) this.itemsType = 'string';
-      if (validator instanceof NumberZod) this.itemsType = 'number';
-      if (validator instanceof FileZod) this.itemsType = 'file';
-      if (validator instanceof DateZod) this.itemsType = 'date';
-      if (validator instanceof BooleanZod) this.itemsType = 'boolean';
-      if (validator instanceof ArrayZod) this.itemsType = 'array';
-      if (validator instanceof ObjectZod) this.itemsType = 'object';
+      if (validator instanceof StringZod) this.itemsType = "string";
+      if (validator instanceof NumberZod) this.itemsType = "number";
+      if (validator instanceof FileZod) this.itemsType = "file";
+      if (validator instanceof DateZod) this.itemsType = "date";
+      if (validator instanceof BooleanZod) this.itemsType = "boolean";
+      if (validator instanceof ArrayZod) this.itemsType = "array";
+      if (validator instanceof ObjectZod) this.itemsType = "object";
 
       this.validator = validator as YelixValidationBase<T>;
     }
