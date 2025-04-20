@@ -45,7 +45,7 @@ function serveEndpoints(
     const middlewares = endpoint.middlewares;
 
     for (const method of methods) {
-      yelix.log(`Serving ${method.method} ${endpoint.path}`);
+      yelix.logger.debug(`Serving ${method.method} ${endpoint.path}`);
 
       const isHide = (endpoint?.openAPI as OpenAPIYelixDoc)?.hide ?? false;
 

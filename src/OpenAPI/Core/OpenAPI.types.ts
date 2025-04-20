@@ -1,4 +1,4 @@
-import type { ValidationType, YelixValidationBase } from "@/mod.ts";
+import type { YelixValidationBase } from "@/mod.ts";
 import type { AllowedLicenses } from "../Core/index.ts";
 
 type OpenAPIMethods = "POST" | "GET" | "PUT" | "DELETE" | "PATCH" | "OPTIONS";
@@ -29,7 +29,7 @@ type OpenAPI = {
   servers?: OpenAPIServer[];
   paths?: Record<string, OpenAPIPathItem | OpenAPIReference>;
   webhooks?: Record<string, OpenAPIPathItem | OpenAPIReference>;
-  componenets?: OpenAPIComponents;
+  components?: OpenAPIComponents;
   security?: SecurityRequirement;
   tags?: OpenAPITag[];
   externalDocs?: OpenAPIExternalDocs;
@@ -157,12 +157,71 @@ type OpenAPIComponents = {
   responses?: Record<string, OpenAPIResponse | OpenAPIReference>;
   parameters?: Record<string, OpenAPIParameter>;
   examples?: Record<string, OpenAPIExample>;
-  requestBodies?: Record<string, OpenAPIRequestBody>;
+  // requestBodies?: Record<string, OpenAPIRequestBody | OpenAPIReference>;
+  requestBodies?: OpenAPIRequestBodyNonDocumented;
   headers?: Record<string, OpenAPIHeader>;
   securitySchemes?: Record<string, OpenAPISecurityScheme>;
   links?: Record<string, OpenAPILink>;
   callbacks?: Record<string, OpenAPICallback>;
   pathItems?: Record<string, OpenAPIPathItem>;
+};
+
+type OpenAPIRequestBodyNonDocumented = {
+  required?: boolean;
+  content?: Record<string, OpenAPIExtenedRequestBodySchema>;
+};
+
+// https://swagger.io/docs/specification/v3_0/data-models/data-types/
+type OpenAPIDataTypes =
+  | "string"
+  | "number"
+  | "integer"
+  | "boolean"
+  | "array"
+  | "object";
+
+type OpenAPIExtenedRequestBodySchema = OpenAPIMediaType & {
+  type?: OpenAPIDataTypes;
+  properties?: Record<string, OpenAPIProperty>;
+  // deno-lint-ignore no-explicit-any
+  examples?: any[];
+  required?: string[]; // Add required fields support
+  schema?: OpenAPIProperty;
+};
+
+type OpenAPIFormatTypes =
+  | "email"
+  | "date-time"
+  | "date"
+  | "time"
+  | "duration"
+  | "password"
+  | "byte"
+  | "binary"
+  | "uuid"
+  | "uri"
+  | "uri-reference"
+  | "uri-template"
+  | "hostname"
+  | "ipv4"
+  | "ipv6"
+  | "regex"
+  | "json-pointer"
+  | "relative-json-pointer";
+
+type OpenAPIProperty = {
+  type?: OpenAPIDataTypes;
+  properties?: Record<string, OpenAPIProperty>; // object subFields
+  examples?: (string | number)[];
+  minLength?: number; // for string length
+  maxLength?: number; // for string length
+  format?: OpenAPIFormatTypes;
+  minimum?: number; // for number values
+  maximum?: number; // for number values
+
+  // array
+  items?: OpenAPIProperty;
+  minItems?: number;
 };
 
 /**
@@ -483,6 +542,8 @@ type OpenAPIDefaultSchema = {
   enum?: string[];
   default?: string;
   example?: string;
+  format?: OpenAPIFormatTypes;
+  items?: OpenAPIDefaultSchema; // Add items property for arrays
   properties?: Record<string, OpenAPISchema | OpenAPIDefaultSchema>;
 };
 
@@ -649,7 +710,7 @@ type OpenAPIOperation = {
   externalDocs?: OpenAPIExternalDocs;
   operationId?: string;
   parameters?: (OpenAPIParameter | OpenAPIReference)[];
-  requestBody?: OpenAPIRequestBody | OpenAPIReference;
+  requestBody?: OpenAPIRequestBodyNonDocumented;
   responses: Record<string, OpenAPIResponse | OpenAPIReference>;
   callbacks?: Record<string, OpenAPICallback | OpenAPIReference>;
   deprecated?: boolean;
@@ -682,7 +743,7 @@ type OpenAPIDoc = {
   description?: string;
   tags?: string[];
   responses?: Record<string, unknown>;
-  validation?: ValidationType;
+  validation?: unknown;
   query?: Record<string, { description: string }>;
 };
 
@@ -713,8 +774,9 @@ type NewEndpointParams = {
   description?: string;
   tags?: string[];
   responses?: Record<string, AddOpenAPIEndpointResponseParams>;
-  validation?: ValidationType;
+  validation?: unknown;
   query?: Record<string, { description: string }>;
+  bodyType?: string; // 'application/json' by default
 };
 
 export type {
@@ -725,11 +787,13 @@ export type {
   OpenAPICallback,
   OpenAPIComponents,
   OpenAPIContact,
+  OpenAPIDataTypes,
   OpenAPIDefaultSchema,
   OpenAPIDiscriminator,
   OpenAPIDoc,
   OpenAPIEncoding,
   OpenAPIExample,
+  OpenAPIExtenedRequestBodySchema,
   OpenAPIExternalDocs,
   OpenAPIHeader,
   OpenAPIInfo,
@@ -744,8 +808,10 @@ export type {
   OpenAPIParameterLocation,
   OpenAPIParams,
   OpenAPIPathItem,
+  OpenAPIProperty,
   OpenAPIReference,
   OpenAPIRequestBody,
+  OpenAPIRequestBodyNonDocumented,
   OpenAPIResponse,
   OpenAPISchema,
   OpenAPISecurityScheme,
