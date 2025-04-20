@@ -1,4 +1,5 @@
-const endpoints = [
+// deno-lint-ignore no-explicit-any
+const endpoints: any[] = [
   await import("./api/body.ts"),
   await import("./api/formData.ts"),
   await import("./api/hello.ts"),
