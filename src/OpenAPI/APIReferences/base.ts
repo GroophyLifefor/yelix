@@ -23,7 +23,7 @@ class APIReferenceBase {
   }
 
   serve(yelix: Yelix): void {
-    yelix.app.get(this.path, (ctx) => {
+    yelix.app.get(this.path, (ctx: Ctx) => {
       return this.getResponse(ctx);
     });
   }
