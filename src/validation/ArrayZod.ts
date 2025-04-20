@@ -4,14 +4,30 @@ import {
   type FailedMessage,
   YelixValidationBase,
 } from "@/src/validation/ValidationBase.ts";
+import { DateZod, FileZod, NumberZod, ObjectZod, StringZod } from "@/mod.ts";
+import { BooleanZod } from "@/src/validation/BooleanZod.ts";
 
 class ArrayZod<T> extends YelixValidationBase<T[]> {
   input: YelixInput;
   override type: string = "array";
+  itemsType: string = "any";
+  validator: YelixValidationBase<T> | null = null;
 
-  constructor(_input: YelixInput) {
+  constructor(_input: YelixInput, validator?: YelixValidationBase<T>) {
     super();
     this.input = _input;
+
+    if (validator) {
+      if (validator instanceof StringZod) this.itemsType = "string";
+      if (validator instanceof NumberZod) this.itemsType = "number";
+      if (validator instanceof FileZod) this.itemsType = "file";
+      if (validator instanceof DateZod) this.itemsType = "date";
+      if (validator instanceof BooleanZod) this.itemsType = "boolean";
+      if (validator instanceof ArrayZod) this.itemsType = "array";
+      if (validator instanceof ObjectZod) this.itemsType = "object";
+
+      this.validator = validator as YelixValidationBase<T>;
+    }
 
     this.required();
     this.isValidType();
