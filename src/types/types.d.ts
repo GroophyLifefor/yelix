@@ -1,11 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 import type { Context } from "hono";
 import type { H } from "hono/types";
-import type {
-  ObjectZod,
-  Yelix,
-  YelixValidationBase,
-} from "@/mod.ts";
+import type { ObjectZod, Yelix, YelixValidationBase } from "@/mod.ts";
 import type { OpenAPIDoc } from "@/src/OpenAPI/Core/index.ts";
 import type { ApiReferenceOptions } from "@/src/OpenAPI/APIReferences/scalar.type.ts";
 
