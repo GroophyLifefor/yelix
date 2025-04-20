@@ -109,7 +109,8 @@ async function generateEndpointsFile(rootPath: string, outputPath: string) {
     }
   });
 
-  const endpointsContent = "const endpoints = [\n" +
+  const endpointsContent = "// deno-lint-ignore no-explicit-any" +
+    "const endpoints: any[] = [\n" +
     importStatements.join("") +
     "\n];\nexport default endpoints;\n";
 
