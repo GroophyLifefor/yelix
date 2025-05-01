@@ -1,7 +1,7 @@
 {
   "name": "@murat/yelix",
   "exports": "./mod.ts",
-  "version": "0.1.46",
+  "version": "0.1.47",
   "license": "MIT",
   "nodeModulesDir": "auto",
   "tasks": {
